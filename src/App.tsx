@@ -44,6 +44,17 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
     }
   });
 
+  useEffect(() => {
+    const handleStorageSync = (e: CustomEvent) => {
+      if (e.detail.key === 'ALL_CERT_KEYS' || e.detail.key === key) {
+        const item = window.localStorage.getItem(key);
+        setStoredValue(item ? JSON.parse(item) : initialValue);
+      }
+    };
+    window.addEventListener('local-storage-sync', handleStorageSync as EventListener);
+    return () => window.removeEventListener('local-storage-sync', handleStorageSync as EventListener);
+  }, [key, initialValue]);
+
   const setValue = (value: T | ((val: T) => T)) => {
     try {
       const valueToStore = typeof value === 'function' ? (value as (val: T) => T)(storedValue) : value;
@@ -58,6 +69,53 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   return [storedValue, setValue];
 }
 
+// Global History Manager for Undo/Redo
+let historyStack: Record<string, string>[] = [];
+let historyIndex = -1;
+
+export const saveHistorySnapshot = () => {
+  const snapshot: Record<string, string> = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('cert-') && key !== 'cert-cache-version' && key !== 'cert-guest-credits') {
+      snapshot[key] = localStorage.getItem(key) || '';
+    }
+  }
+  historyStack = historyStack.slice(0, historyIndex + 1);
+  historyStack.push(snapshot);
+  if (historyStack.length > 30) historyStack.shift();
+  historyIndex = historyStack.length - 1;
+};
+
+export const undoHistory = () => {
+  if (historyIndex > 0) {
+    historyIndex--;
+    const snapshot = historyStack[historyIndex];
+    Object.keys(snapshot).forEach(key => localStorage.setItem(key, snapshot[key]));
+    window.dispatchEvent(new CustomEvent('local-storage-sync', { detail: { key: 'ALL_CERT_KEYS' } }));
+  }
+};
+
+export const redoHistory = () => {
+  if (historyIndex < historyStack.length - 1) {
+    historyIndex++;
+    const snapshot = historyStack[historyIndex];
+    Object.keys(snapshot).forEach(key => localStorage.setItem(key, snapshot[key]));
+    window.dispatchEvent(new CustomEvent('local-storage-sync', { detail: { key: 'ALL_CERT_KEYS' } }));
+  }
+};
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) redoHistory();
+      else undoHistory();
+    }
+  });
+  setTimeout(() => { if (historyStack.length === 0) saveHistorySnapshot(); }, 1000);
+}
+
 // Draggable Block Wrapper for free positioning (Adobe Illustrator Style)
 const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnapGuide }: any) => {
   const [savedPos, setSavedPos] = useLocalStorage<{x: number, y: number}>(posKey, defaultPos);
@@ -65,6 +123,12 @@ const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnap
   // Initialize motion values with saved position
   const x = useMotionValue(savedPos.x);
   const y = useMotionValue(savedPos.y);
+
+  // Sync visually when undo/redo changes the savedPos state
+  useEffect(() => {
+    x.set(savedPos.x);
+    y.set(savedPos.y);
+  }, [savedPos.x, savedPos.y, x, y]);
   
   const dragControls = useDragControls();
   const [isHovered, setIsHovered] = useState(false);
@@ -98,6 +162,7 @@ const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnap
         
         // Save final position to localStorage
         setSavedPos({ x: finalX, y: finalY });
+        setTimeout(() => saveHistorySnapshot(), 10);
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -120,13 +185,16 @@ const ContentEditable = ({ html, onChange, className = "", tagName = 'div', onFo
   const contentEditableRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (contentEditableRef.current && html !== contentEditableRef.current.innerHTML) {
+    if (contentEditableRef.current && contentEditableRef.current.innerHTML !== html) {
       contentEditableRef.current.innerHTML = html;
     }
   }, [html]);
 
-  const handleInput = (e: React.SyntheticEvent<HTMLElement>) => {
-    onChange(e.currentTarget.innerHTML);
+  const handleInput = (e: React.FormEvent<HTMLElement>) => {
+    const value = e.currentTarget.innerHTML;
+    if (value !== html) {
+      onChange(value);
+    }
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLElement>) => {
@@ -136,6 +204,7 @@ const ContentEditable = ({ html, onChange, className = "", tagName = 'div', onFo
   const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
     handleInput(e);
     if (onBlur) onBlur(e);
+    setTimeout(() => saveHistorySnapshot(), 10);
   };
 
   const Tag = tagName as any;
