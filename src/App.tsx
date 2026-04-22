@@ -21,7 +21,11 @@ import {
   X,
   ZoomIn,
   ZoomOut,
-  Maximize
+  Maximize,
+  Image as ImageIcon,
+  Type,
+  List,
+  Wand2
 } from 'lucide-react';
 
 // Custom hook to persist state in localStorage (Auto-save)
@@ -398,6 +402,18 @@ export default function App() {
     }
   };
 
+  // Dynamic Smart Guide Logic
+  const getHelperText = () => {
+    switch(activeEditor) {
+      case 'header': return { title: 'Logotipo & Escola', text: 'Altere o nome da instituição ou carregue o seu logotipo no botão superior.', icon: <ImageIcon className="w-5 h-5 text-[#d4af37]" /> };
+      case 'title': return { title: 'Título Principal', text: 'Destaque o documento. Use letras MAIÚSCULAS para um visual mais formal.', icon: <Type className="w-5 h-5 text-[#d4af37]" /> };
+      case 'body': return { title: 'Corpo do Texto', text: 'Selecione partes específicas do texto para aplicar Negrito, Itálico ou Sublinhado.', icon: <AlignLeft className="w-5 h-5 text-[#d4af37]" /> };
+      case 'grades': return { title: 'Tabela de Avaliação', text: 'Altere os valores ou clique e arraste as linhas para reordenar a pauta.', icon: <List className="w-5 h-5 text-[#d4af37]" /> };
+      default: return { title: 'Assistente Inteligente', text: 'Bem-vindo! Clique em qualquer texto do certificado abaixo para começar a editar.', icon: <Wand2 className="w-5 h-5 text-[#d4af37]" /> };
+    }
+  };
+  const helper = getHelperText();
+
   return (
     <div className="min-h-screen bg-[#0b162c] flex flex-col font-sans selection:bg-[#d4af37] selection:text-[#0b162c]">
       
@@ -438,97 +454,99 @@ export default function App() {
       {/* Main App Workspace */}
       <div className="flex flex-col w-full flex-1 bg-gray-200 items-center pt-8 pb-8 relative shadow-[inset_0_10px_20px_rgba(0,0,0,0.3)] min-h-[800px]">
       
-        {/* Main Editor Toolbar (Hidden during print) */}
-        <div className="w-full max-w-[1123px] mx-auto bg-white shadow-xl border border-gray-200 rounded-2xl mb-8 z-40 no-print flex flex-wrap items-center justify-between px-6 py-3.5 gap-4">
-          <div className="flex items-center gap-6 flex-wrap">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4 text-[#112344]"/>
-              </div>
-              <span className="font-bold text-[#112344] tracking-tight uppercase text-[11px]">Editor de Certificados</span>
+        {/* Main Editor Toolbar */}
+        <div className="w-full max-w-[1123px] mx-auto bg-white/95 backdrop-blur-md shadow-2xl border border-gray-200/60 rounded-2xl mb-8 z-40 no-print p-3 flex flex-col md:flex-row items-center justify-between gap-4 transition-all hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)]">
+          <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 px-1 custom-scrollbar">
+            {/* Branding/Status */}
+            <div className="flex items-center gap-3 pr-4 border-r border-gray-200 shrink-0">
+               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-gray-100 to-white flex items-center justify-center border border-gray-200 shadow-sm relative overflow-hidden">
+                 <div className="absolute inset-0 bg-[#d4af37]/10 animate-pulse"></div>
+                 <Wand2 className="w-4 h-4 text-[#112344] relative z-10"/>
+               </div>
+               <div className="flex flex-col">
+                 <span className="font-extrabold text-[#112344] tracking-tight uppercase text-[11px] leading-tight">Ferramentas</span>
+                 <span className="text-gray-400 text-[9px] font-bold tracking-widest uppercase">Editor Ativo</span>
+               </div>
             </div>
-            
-            <div className="h-6 w-[1px] bg-gray-200 hidden sm:block"></div>
             
             {/* Formatting Tools */}
-            <div className="flex items-center gap-0.5 bg-gray-50 p-1 rounded-xl border border-gray-100">
-              <button onMouseDown={(e) => { e.preventDefault(); execFormat('bold'); }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-700 transition-all font-bold w-9 text-center text-sm" title="Negrito">B</button>
-              <button onMouseDown={(e) => { e.preventDefault(); execFormat('italic'); }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-700 transition-all italic w-9 text-center text-sm" title="Itálico">I</button>
-              <button onMouseDown={(e) => { e.preventDefault(); execFormat('underline'); }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-700 transition-all underline w-9 text-center text-sm" title="Sublinhado">U</button>
-              
-              <div className="w-[1px] h-4 bg-gray-200 mx-1.5"></div>
-              
-              <button onMouseDown={(e) => { e.preventDefault(); execFormat('justifyLeft'); }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Alinhar à Esquerda">
-                <AlignLeft className="w-4 h-4" />
-              </button>
-              <button onMouseDown={(e) => { e.preventDefault(); execFormat('justifyCenter'); }} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Centralizar">
-                <AlignCenter className="w-4 h-4" />
-              </button>
+            <div className="flex items-center gap-1 bg-gray-50/80 p-1.5 rounded-xl shrink-0 border border-gray-100">
+              <button onMouseDown={(e) => { e.preventDefault(); execFormat('bold'); }} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-700 transition-all font-bold text-sm" title="Negrito (Ctrl+B)">B</button>
+              <button onMouseDown={(e) => { e.preventDefault(); execFormat('italic'); }} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-700 transition-all italic text-sm font-serif" title="Itálico (Ctrl+I)">I</button>
+              <button onMouseDown={(e) => { e.preventDefault(); execFormat('underline'); }} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-700 transition-all underline text-sm" title="Sublinhado">U</button>
+              <div className="w-[1px] h-5 bg-gray-200 mx-1.5"></div>
+              <button onMouseDown={(e) => { e.preventDefault(); execFormat('justifyLeft'); }} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Alinhar à Esquerda"><AlignLeft className="w-4 h-4" /></button>
+              <button onMouseDown={(e) => { e.preventDefault(); execFormat('justifyCenter'); }} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Centralizar"><AlignCenter className="w-4 h-4" /></button>
             </div>
-
-            <div className="h-6 w-[1px] bg-gray-200 hidden md:block"></div>
 
             {/* Zoom Controls */}
-            <div className="flex items-center gap-1 bg-gray-50 p-1 rounded-xl border border-gray-100">
-              <button onClick={() => setZoomLevel(prev => Math.max(0.3, prev - 0.1))} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Reduzir Zoom">
-                <ZoomOut className="w-4 h-4" />
-              </button>
-              <span className="text-xs font-bold text-gray-600 w-10 text-center select-none">{Math.round(zoomLevel * 100)}%</span>
-              <button onClick={() => setZoomLevel(prev => Math.min(2.5, prev + 0.1))} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Aumentar Zoom">
-                <ZoomIn className="w-4 h-4" />
-              </button>
-              <button onClick={() => setZoomLevel(1)} className="p-2 hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all ml-1 border-l border-gray-200 pl-3" title="Tamanho Padrão">
-                <Maximize className="w-3 h-3" />
-              </button>
-            </div>
-            
-            <div className="h-6 w-[1px] bg-gray-200 hidden md:block"></div>
-            
-            <div className="flex items-center">
-              {isSaved ? (
-                <div className="flex items-center gap-1.5 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                  <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Alterações Salvas</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100">
-                  <RotateCcw className="w-3 h-3 text-amber-500 animate-spin" />
-                  <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Salvando...</span>
-                </div>
-              )}
+            <div className="flex items-center gap-1 bg-gray-50/80 p-1.5 rounded-xl shrink-0 border border-gray-100">
+              <button onClick={() => setZoomLevel(prev => Math.max(0.3, prev - 0.1))} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all hover:text-blue-600" title="Reduzir Zoom"><ZoomOut className="w-4 h-4" /></button>
+              <span className="text-[11px] font-bold text-gray-700 w-11 text-center select-none bg-white py-1 rounded shadow-inner">{Math.round(zoomLevel * 100)}%</span>
+              <button onClick={() => setZoomLevel(prev => Math.min(2.5, prev + 0.1))} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all hover:text-blue-600" title="Aumentar Zoom"><ZoomIn className="w-4 h-4" /></button>
+              <button onClick={() => setZoomLevel(1)} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-500 transition-all ml-1.5 border-l border-gray-200 pl-2" title="Tamanho Padrão"><Maximize className="w-3.5 h-3.5" /></button>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
-            <button onClick={handleReset} className="text-gray-400 hover:text-red-500 text-[11px] font-bold uppercase tracking-wider transition-colors">
-              Restaurar Padrão
-            </button>
-            <button 
-              onClick={handlePrint} 
-              className="bg-[#112344] hover:bg-[#0b162c] text-white font-bold px-7 py-3 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-black/10 hover:shadow-black/20"
-            >
-              <Download className="w-4 h-4 text-[#d4af37]"/>
-              <span className="uppercase tracking-tight text-xs">Salvar PDF / Imprimir</span>
-            </button>
+          <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end px-2 md:px-0">
+            {/* Save Status Indicator */}
+            <div className="flex items-center">
+              {isSaved ? (
+                <div className="flex items-center gap-2 bg-green-50/80 px-3 py-1.5 rounded-full border border-green-200/60 shadow-sm transition-all duration-300">
+                  <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] animate-pulse"></div>
+                  <span className="text-[10px] font-bold text-green-700 uppercase tracking-wider">Salvo</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-amber-50/80 px-3 py-1.5 rounded-full border border-amber-200/60 shadow-sm transition-all duration-300">
+                  <RotateCcw className="w-3 h-3 text-amber-500 animate-spin" />
+                  <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider">A Salvar</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button onClick={handleReset} className="text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-wider transition-colors px-2 py-2 hover:bg-red-50 rounded-lg">
+                Restaurar
+              </button>
+              <button 
+                onClick={handlePrint} 
+                className="bg-gradient-to-r from-[#112344] to-[#1a365d] hover:from-[#0b162c] hover:to-[#112344] text-white font-bold px-6 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_8px_20px_-6px_rgba(17,35,68,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(17,35,68,0.6)] hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <Download className="w-4 h-4 text-[#d4af37] animate-bounce-subtle"/>
+                <span className="uppercase tracking-wide text-[11px]">Gerar PDF</span>
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Dynamic Context Guide Wrapper (Absolute to prevent layout shift) */}
-        <div className="absolute top-[85px] left-0 w-full flex justify-center z-50 pointer-events-none no-print">
-          <div className={`transition-all duration-300 ease-out transform pointer-events-auto ${activeEditor ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'}`}>
-            <div className="bg-[#112344] text-white px-6 py-3.5 rounded-2xl text-sm font-medium flex items-center gap-4 shadow-2xl border border-white/10">
-              <div className="w-8 h-8 rounded-full bg-[#d4af37]/20 flex items-center justify-center shrink-0">
-                <Info className="w-5 h-5 text-[#d4af37]"/>
+        <div className="absolute top-[85px] left-0 w-full flex justify-center z-50 pointer-events-none no-print [perspective:1000px]">
+          <div className={`transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] transform pointer-events-auto origin-top ${activeEditor ? 'opacity-100 translate-y-0 rotate-x-0 scale-100' : 'opacity-0 -translate-y-6 rotate-x-12 scale-95'}`}>
+            <div className="bg-[#0b162c]/95 backdrop-blur-xl text-white px-5 py-4 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.6)] border border-[#d4af37]/20 flex items-start gap-4 max-w-[600px] mx-4 relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#d4af37] to-transparent opacity-50"></div>
+              
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4af37]/20 to-yellow-600/20 flex items-center justify-center shrink-0 border border-[#d4af37]/30 shadow-inner relative mt-0.5">
+                <div className="absolute inset-0 bg-[#d4af37]/20 animate-ping rounded-full opacity-20"></div>
+                {helper.icon}
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-[#d4af37] text-xs uppercase tracking-wider mb-0.5">Dica de Edição</span>
-                <span>Seleccione o texto e use as opções acima ou atalhos (<kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+B</kbd>, <kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+I</kbd>, <kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+Z</kbd> para anular).</span>
-              </div>
-              {activeEditor === 'grades' && (
-                <div className="ml-4 pl-4 border-l border-white/20 flex items-center gap-2 text-[#a3b8cc] text-xs">
-                  <span>Pode arrastar as linhas das notas para reordenar.</span>
+              
+              <div className="flex flex-col flex-1">
+                <div className="flex items-center justify-between mb-1.5">
+                   <span className="font-black text-[#d4af37] text-[12px] uppercase tracking-widest flex items-center gap-2">
+                     {helper.title}
+                   </span>
+                   {activeEditor === 'grades' && <span className="bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider animate-pulse">Drag & Drop</span>}
                 </div>
-              )}
+                
+                <span className="text-gray-200 text-[13px] leading-relaxed font-medium">{helper.text}</span>
+                
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/10 opacity-70 group-hover:opacity-100 transition-opacity">
+                   <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Atalhos:</span>
+                   <kbd className="bg-white/10 border border-white/10 text-gray-300 px-1.5 py-0.5 rounded shadow-sm text-[10px] font-mono hover:bg-white/20 transition-colors cursor-help">Ctrl+B</kbd>
+                   <kbd className="bg-white/10 border border-white/10 text-gray-300 px-1.5 py-0.5 rounded shadow-sm text-[10px] font-mono hover:bg-white/20 transition-colors cursor-help">Ctrl+I</kbd>
+                   <kbd className="bg-white/10 border border-white/10 text-gray-300 px-1.5 py-0.5 rounded shadow-sm text-[10px] font-mono hover:bg-white/20 transition-colors cursor-help">Ctrl+Z</kbd>
+                </div>
+              </div>
             </div>
           </div>
         </div>
