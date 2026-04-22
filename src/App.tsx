@@ -25,7 +25,8 @@ import {
   Image as ImageIcon,
   Type,
   List,
-  Wand2
+  Wand2,
+  Printer
 } from 'lucide-react';
 
 // Custom hook to persist state in localStorage (Auto-save)
@@ -356,7 +357,7 @@ export default function App() {
     const success = await deductCredit();
     if (!success) return;
 
-    if (!certificateRef.current) return;
+    if (!printAreaRef.current) return;
     setIsDownloading(true);
     
     try {
@@ -364,7 +365,7 @@ export default function App() {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
-      const element = certificateRef.current;
+      const element = printAreaRef.current;
       
       // Save current transform and enforce scale 1 for clear capture
       const originalTransform = element.style.transform;
