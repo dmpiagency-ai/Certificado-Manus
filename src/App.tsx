@@ -975,8 +975,8 @@ export default function App() {
                  <X className="w-5 h-5" />
               </button>
               <div className="p-8">
-                 <h2 className="text-2xl font-bold text-[#112344] mb-2">Login de Licenciado</h2>
-                 <p className="text-gray-500 text-sm mb-6">Insira suas credenciais da SaaS Edition PRO.</p>
+                 <h2 className="text-2xl font-bold text-[#112344] mb-2">Acesso ao Sistema</h2>
+                 <p className="text-gray-500 text-sm mb-6">Insira suas credenciais para continuar.</p>
                  
                  <form onSubmit={handleAuth} className="flex flex-col gap-4">
                     {authError && <div className="bg-red-50 text-red-500 p-3 rounded-xl text-xs font-bold border border-red-100">{authError}</div>}
