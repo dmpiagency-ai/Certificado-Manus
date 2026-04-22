@@ -513,26 +513,31 @@ export default function App() {
           </div>
         </div>
 
-        {/* Dynamic Context Guide (Only shows when editing text) */}
-        <div className={`mb-8 transition-all duration-300 ease-out transform ${activeEditor ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95 pointer-events-none absolute'}`}>
-          <div className="bg-[#112344] text-white px-6 py-3.5 rounded-2xl text-sm font-medium flex items-center gap-4 shadow-xl border border-white/10">
-            <div className="w-8 h-8 rounded-full bg-[#d4af37]/20 flex items-center justify-center shrink-0">
-              <Info className="w-5 h-5 text-[#d4af37]"/>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-[#d4af37] text-xs uppercase tracking-wider mb-0.5">Dica de Edição</span>
-              <span>Seleccione o texto e use as opções acima ou atalhos (<kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+B</kbd>, <kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+I</kbd>, <kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+Z</kbd> para anular).</span>
-            </div>
-            {activeEditor === 'grades' && (
-              <div className="ml-4 pl-4 border-l border-white/20 flex items-center gap-2 text-[#a3b8cc] text-xs">
-                <span>Pode arrastar as linhas das notas para reordenar.</span>
+        {/* Dynamic Context Guide Wrapper (Absolute to prevent layout shift) */}
+        <div className="absolute top-[85px] left-0 w-full flex justify-center z-50 pointer-events-none no-print">
+          <div className={`transition-all duration-300 ease-out transform pointer-events-auto ${activeEditor ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-4 scale-95'}`}>
+            <div className="bg-[#112344] text-white px-6 py-3.5 rounded-2xl text-sm font-medium flex items-center gap-4 shadow-2xl border border-white/10">
+              <div className="w-8 h-8 rounded-full bg-[#d4af37]/20 flex items-center justify-center shrink-0">
+                <Info className="w-5 h-5 text-[#d4af37]"/>
               </div>
-            )}
+              <div className="flex flex-col">
+                <span className="font-bold text-[#d4af37] text-xs uppercase tracking-wider mb-0.5">Dica de Edição</span>
+                <span>Seleccione o texto e use as opções acima ou atalhos (<kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+B</kbd>, <kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+I</kbd>, <kbd className="bg-white/20 px-1.5 py-0.5 rounded text-xs mx-1">Ctrl+Z</kbd> para anular).</span>
+              </div>
+              {activeEditor === 'grades' && (
+                <div className="ml-4 pl-4 border-l border-white/20 flex items-center gap-2 text-[#a3b8cc] text-xs">
+                  <span>Pode arrastar as linhas das notas para reordenar.</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
       {/* Preview Area */}
-      <div className="relative w-full overflow-visible flex justify-center pb-20 custom-scrollbar">
+      <div 
+        className="relative w-full overflow-visible flex justify-center custom-scrollbar"
+        style={{ height: `${794 * certScale + 80}px` }}
+      >
         
         {/* Certificate Container: Precise A4 Dimensions (1123px x 794px at 96 DPI) */}
         <div 
