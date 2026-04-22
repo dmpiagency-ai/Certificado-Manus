@@ -105,6 +105,7 @@ export default function App() {
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authError, setAuthError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   // certScale is now derived from baseScale * zoomLevel
   const [activeEditor, setActiveEditor] = useState<string | null>(null);
   const [draggedGradeIdx, setDraggedGradeIdx] = useState<number | null>(null);
@@ -328,13 +329,11 @@ export default function App() {
     setTimeout(() => setIsSaved(true), 500);
   };
 
-  const handlePrint = async () => {
+  const deductCredit = async (): Promise<boolean> => {
     if (currentCredits <= 0) {
       setShowRechargeModal(true);
-      return;
+      return false;
     }
-
-    // Deduct credit first, then print
     if (user) {
       await updateDoc(doc(db, 'users', user.uid), {
         credits: Math.max(0, (userData?.credits ?? 1) - 1),
@@ -343,10 +342,60 @@ export default function App() {
     } else {
       setGuestCredits(Math.max(0, guestCredits - 1));
     }
+    return true;
+  };
 
-    // Use the native Print API — no external libs, no oklch issues.
-    // The @media print CSS in index.css handles A4 landscape layout.
-    window.print();
+  const handlePrint = async () => {
+    const success = await deductCredit();
+    if (success) {
+      window.print();
+    }
+  };
+
+  const downloadPDF = async () => {
+    const success = await deductCredit();
+    if (!success) return;
+
+    if (!certificateRef.current) return;
+    setIsDownloading(true);
+    
+    try {
+      // Import dynamically to optimize initial bundle size
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+
+      const element = certificateRef.current;
+      
+      // Save current transform and enforce scale 1 for clear capture
+      const originalTransform = element.style.transform;
+      element.style.transform = 'scale(1)';
+      
+      const canvas = await html2canvas(element, {
+        scale: 2, // High resolution
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+      
+      // Restore the scale so UI doesn't break
+      element.style.transform = originalTransform;
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // A4 landscape dimensions: 297x210 mm
+      pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
+      pdf.save('Certificado-Manus.pdf');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Ocorreu um erro ao gerar o PDF. Verifique a sua ligação ou tente novamente.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   // Drag and Drop Handlers for Grades
@@ -515,16 +564,26 @@ export default function App() {
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button onClick={handleReset} className="text-gray-400 hover:text-red-500 text-[10px] font-bold uppercase tracking-wider transition-colors px-2 py-2 hover:bg-red-50 rounded-lg">
                 Restaurar
               </button>
+              
+              <button 
+                onClick={downloadPDF} 
+                disabled={isDownloading}
+                className="bg-gradient-to-r from-[#112344] to-[#1a365d] hover:from-[#0b162c] hover:to-[#112344] text-white font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_8px_20px_-6px_rgba(17,35,68,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(17,35,68,0.6)] hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:hover:translate-y-0"
+              >
+                {isDownloading ? <Loader2 className="w-4 h-4 text-[#d4af37] animate-spin" /> : <Download className="w-4 h-4 text-[#d4af37] animate-bounce-subtle"/>}
+                <span className="uppercase tracking-wide text-[10px] sm:text-[11px] whitespace-nowrap">{isDownloading ? 'A Gerar...' : 'Baixar PDF'}</span>
+              </button>
+              
               <button 
                 onClick={handlePrint} 
-                className="bg-gradient-to-r from-[#112344] to-[#1a365d] hover:from-[#0b162c] hover:to-[#112344] text-white font-bold px-6 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-[0_8px_20px_-6px_rgba(17,35,68,0.5)] hover:shadow-[0_12px_25px_-6px_rgba(17,35,68,0.6)] hover:-translate-y-0.5 active:translate-y-0"
+                className="bg-white border border-gray-200 text-[#112344] font-bold px-4 py-2.5 rounded-xl flex items-center gap-2 transition-all hover:bg-gray-50 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0"
               >
-                <Download className="w-4 h-4 text-[#d4af37] animate-bounce-subtle"/>
-                <span className="uppercase tracking-wide text-[11px]">Gerar PDF</span>
+                <Printer className="w-4 h-4 text-[#112344]"/>
+                <span className="uppercase tracking-wide text-[10px] sm:text-[11px] whitespace-nowrap hidden sm:inline-block">Imprimir</span>
               </button>
             </div>
           </div>
