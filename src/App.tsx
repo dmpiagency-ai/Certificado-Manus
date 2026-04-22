@@ -98,7 +98,7 @@ export default function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<{ credits: number, whatsapp: string } | null>(null);
-  const [guestCredits, setGuestCredits] = useLocalStorage<number>('cert-guest-credits', 3);
+  const [guestCredits, setGuestCredits] = useLocalStorage<number>('cert-guest-credits', 2);
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [whatsappStr, setWhatsappStr] = useState('');
   const [passwordStr, setPasswordStr] = useState('');
@@ -115,11 +115,11 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v2';
+    const CACHE_VERSION = 'v3';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       ['cert-logoText1','cert-logoText2','cert-title','cert-line1','cert-line2',
        'cert-line3','cert-line4','cert-line5','cert-sig1Name','cert-sig1Role',
-       'cert-grades','cert-logoImg'].forEach(k => window.localStorage.removeItem(k));
+       'cert-grades','cert-logoImg', 'cert-guest-credits'].forEach(k => window.localStorage.removeItem(k));
       window.localStorage.setItem('cert-cache-version', CACHE_VERSION);
     }
   });
@@ -283,7 +283,7 @@ export default function App() {
         await setDoc(doc(db, 'users', userCredential.user.uid), {
           email: virtualEmail,
           whatsapp: whatsappStr,
-          credits: 3, 
+          credits: 2, 
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
