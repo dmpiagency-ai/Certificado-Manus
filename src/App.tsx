@@ -451,6 +451,17 @@ export default function App() {
           </div>
       </header>
 
+      {/* Mobile Optimization Warning */}
+      <div className="md:hidden w-full bg-amber-500/10 border-b border-amber-500/20 px-5 py-3 flex items-start gap-3 z-50 no-print">
+        <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+        <div className="flex flex-col">
+          <span className="text-amber-500 font-bold text-[11px] uppercase tracking-wider mb-0.5">Recomendação de Uso</span>
+          <span className="text-amber-200/90 text-[12px] leading-snug">
+            A edição requer precisão. Recomendamos o uso de um <strong className="text-amber-400">Computador</strong>. A experiência no telemóvel pode ser limitada pelo tamanho do ecrã.
+          </span>
+        </div>
+      </div>
+
       {/* Main App Workspace */}
       <div className="flex flex-col w-full flex-1 bg-gray-200 items-center pt-8 pb-8 relative shadow-[inset_0_10px_20px_rgba(0,0,0,0.3)] min-h-[800px]">
       
