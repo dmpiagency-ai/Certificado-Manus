@@ -1,0 +1,62 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() { return request.auth != null; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    function isValidTemplate(data) {
+      return data.keys().hasAll(['ownerId', 'title', 'createdAt', 'updatedAt'])
+        && data.ownerId == request.auth.uid
+        && data.title is string && data.title.size() <= 200
+        && (data.logoImg == null || (data.logoImg is string && data.logoImg.size() <= 5000000))
+        && (data.logoText1 == null || (data.logoText1 is string && data.logoText1.size() <= 100))
+        && (data.logoText2 == null || (data.logoText2 is string && data.logoText2.size() <= 100))
+        && (data.line1 == null || (data.line1 is string && data.line1.size() <= 2000))
+        && (data.line2 == null || (data.line2 is string && data.line2.size() <= 2000))
+        && (data.line3 == null || (data.line3 is string && data.line3.size() <= 2000))
+        && (data.line4 == null || (data.line4 is string && data.line4.size() <= 2000))
+        && (data.line5 == null || (data.line5 is string && data.line5.size() <= 2000))
+        && (data.sig1Name == null || (data.sig1Name is string && data.sig1Name.size() <= 100))
+        && (data.sig1Role == null || (data.sig1Role is string && data.sig1Role.size() <= 100))
+        && (data.grades == null || (data.grades is list && data.grades.size() <= 30));
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn() && request.auth.uid == userId
+                    && isValidId(userId)
+                    && incoming().keys().hasAll(['email', 'createdAt'])
+                    && incoming().keys().size() <= 3
+                    && incoming().email == request.auth.token.email
+                    && incoming().createdAt == request.time
+                    && (!('isPro' in incoming()) || incoming().isPro == false);
+      allow update: if isSignedIn() && request.auth.uid == userId
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['updatedAt'])
+                    && incoming().updatedAt == request.time;
+    }
+
+    match /templates/{templateId} {
+      allow get: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() 
+                    && isValidId(templateId)
+                    && isValidTemplate(incoming())
+                    && incoming().createdAt == request.time
+                    && incoming().updatedAt == request.time;
+      allow update: if isSignedIn() 
+                    && existing().ownerId == request.auth.uid
+                    && isValidTemplate(incoming())
+                    && incoming().ownerId == existing().ownerId
+                    && incoming().createdAt == existing().createdAt
+                    && incoming().updatedAt == request.time
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'logoImg', 'logoText1', 'logoText2', 'line1', 'line2', 'line3', 'line4', 'line5', 'sig1Name', 'sig1Role', 'grades', 'updatedAt']);
+      allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
+    }
+  }
+}

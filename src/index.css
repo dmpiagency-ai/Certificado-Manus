@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Great+Vibes&display=swap');
+@import "tailwindcss";
+
+/*
+ * html2canvas compatibility fix — Tailwind v4 uses oklch() colors by default,
+ * which html2canvas cannot parse. We override any oklch-based utilities INSIDE
+ * the print area with safe RGB/hex equivalents so the PDF capture works correctly.
+ */
+@layer base {
+  :root {
+    /* Force color scheme to avoid oklch in media queries */
+    color-scheme: light;
+  }
+}
+
+/* Prevent Tailwind's oklch palette from leaking into the captured canvas */
+#print-area,
+#print-area * {
+  /* Reset any CSS-var-based color to a safe fallback for html2canvas */
+  --tw-ring-color: rgba(59, 130, 246, 0.5);
+  --tw-shadow-color: rgb(0 0 0 / 0.1);
+}
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Montserrat", sans-serif;
+  --font-signature: "Great Vibes", cursive;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Force the print-area to span exactly an A4 landscape page and ignore parent constraints */
+  #print-area {
+    position: relative;
+    width: 1123px !important;
+    height: 794px !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    zoom: 1 !important;
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "entities": {
+    "CertificateTemplate": {
+      "title": "CertificateTemplate",
+      "description": "Stores user customization data for a certificate template.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "description": "UID of the user who owns this template."
+        },
+        "logoImg": {
+          "type": "string",
+          "description": "Base64 encoded logo image or URL."
+        },
+        "logoText1": {
+          "type": "string"
+        },
+        "logoText2": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "line1": {
+          "type": "string"
+        },
+        "line2": {
+          "type": "string"
+        },
+        "line3": {
+          "type": "string"
+        },
+        "line4": {
+          "type": "string"
+        },
+        "line5": {
+          "type": "string"
+        },
+        "sig1Name": {
+          "type": "string"
+        },
+        "sig1Role": {
+          "type": "string"
+        },
+        "grades": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "subject": { "type": "string" },
+              "percent": { "type": "string" },
+              "spell": { "type": "string" }
+            }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of last update."
+        }
+      },
+      "required": ["ownerId", "title", "createdAt", "updatedAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "isPro": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      },
+      "required": ["email", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user account details."
+    },
+    "/templates/{templateId}": {
+      "schema": { "$ref": "#/entities/CertificateTemplate" },
+      "description": "Stores users' saved certificate templates."
+    }
+  }
+}
