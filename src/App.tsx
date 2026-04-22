@@ -402,7 +402,7 @@ export default function App() {
     <div className="min-h-screen bg-[#0b162c] flex flex-col font-sans selection:bg-[#d4af37] selection:text-[#0b162c]">
       
       {/* Header */}
-      <header className="w-full bg-[#112344] border-b border-white/5 px-6 py-4 flex justify-between items-center z-40 sticky top-0 no-print shadow-md">
+      <header className="w-full bg-[#112344] border-b border-white/5 px-6 py-4 flex justify-between items-center z-[100] sticky top-0 no-print shadow-md">
          <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-gradient-to-br from-[#d4af37] to-yellow-600 rounded-lg flex items-center justify-center shadow-lg">
               <Award className="w-5 h-5 text-[#0b162c]" />
