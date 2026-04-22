@@ -26,8 +26,10 @@ import {
   Type,
   List,
   Wand2,
-  Printer
+  Printer,
+  Move
 } from 'lucide-react';
+import { motion, useDragControls, useMotionValue } from 'framer-motion';
 
 // Custom hook to persist state in localStorage (Auto-save)
 function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val: T) => T)) => void] {
@@ -55,6 +57,64 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((val
   };
   return [storedValue, setValue];
 }
+
+// Draggable Block Wrapper for free positioning (Adobe Illustrator Style)
+const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnapGuide }: any) => {
+  const [savedPos, setSavedPos] = useLocalStorage<{x: number, y: number}>(posKey, defaultPos);
+  
+  // Initialize motion values with saved position
+  const x = useMotionValue(savedPos.x);
+  const y = useMotionValue(savedPos.y);
+  
+  const dragControls = useDragControls();
+  const [isHovered, setIsHovered] = useState(false);
+  
+  return (
+    <motion.div
+      drag
+      dragControls={dragControls}
+      dragListener={false} // Only allow dragging from the handle
+      dragMomentum={false}
+      style={{ x, y, position: 'relative' }} // framer-motion manages visual transform directly
+      onDrag={(e, info) => {
+        // Show guide if near center horizontally
+        if (Math.abs(x.get()) < 15) {
+          if (setSnapGuide) setSnapGuide(true);
+        } else {
+          if (setSnapGuide) setSnapGuide(false);
+        }
+      }}
+      onDragEnd={(e, info) => {
+        if (setSnapGuide) setSnapGuide(false);
+        
+        let finalX = x.get();
+        let finalY = y.get();
+        
+        // Smart Snapping to horizontal center (x=0)
+        if (Math.abs(finalX) < 15) {
+          finalX = 0;
+          x.set(0); // Snap visually immediately without waiting for re-render
+        }
+        
+        // Save final position to localStorage
+        setSavedPos({ x: finalX, y: finalY });
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`group outline-none transition-all w-full flex justify-center ${isHovered ? 'ring-2 ring-dashed ring-[#d4af37]/50 bg-[#d4af37]/5' : ''}`}
+    >
+      {/* Drag Handle */}
+      <div 
+        className={`absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-[#112344] rounded-md shadow-lg text-[#d4af37] z-50 cursor-grab active:cursor-grabbing hover:scale-110 no-print`}
+        onPointerDown={(e) => dragControls.start(e)}
+        title="Arrastar livremente"
+      >
+        <Move className="w-3.5 h-3.5" />
+      </div>
+      {children}
+    </motion.div>
+  );
+};
 
 const ContentEditable = ({ html, onChange, className = "", tagName = 'div', onFocus, onBlur }: any) => {
   const contentEditableRef = useRef<HTMLElement>(null);
@@ -110,6 +170,7 @@ export default function App() {
   // certScale is now derived from baseScale * zoomLevel
   const [activeEditor, setActiveEditor] = useState<string | null>(null);
   const [draggedGradeIdx, setDraggedGradeIdx] = useState<number | null>(null);
+  const [snapGuide, setSnapGuide] = useState(false);
   const printAreaRef = useRef<HTMLDivElement>(null);
 
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
@@ -711,108 +772,125 @@ export default function App() {
           {/* Foreground Text Content */}
           <div className="absolute inset-0 z-10 flex flex-col pt-[45px] pb-[135px] px-[150px] text-[#4b5563] font-serif justify-between items-center">
             
-            {/* Header / Logo Section */}
-            <div className="flex w-full justify-center items-center gap-4">
-              <div className="relative group w-[56px] h-[56px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-blue-400 hover:bg-blue-50/30 rounded cursor-pointer transition-all">
-                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleLogoUpload} title="Clique para alterar Logotipo" />
-                {logoImg ? (
-                  <img src={logoImg} className="w-full h-full object-contain pointer-events-none" alt="Logo" />
-                ) : (
-                  <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
-                     <path d="M20,2 L38,20 L20,38 L2,20 Z" />
-                     <path d="M28,10 L38,20 L28,30" stroke="white" strokeWidth="4" />
-                  </svg>
-                )}
-                <div className="absolute -top-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">Trocar Imagem</div>
+            {/* Magnetic Snap Guide */}
+            {snapGuide && (
+              <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[2px] bg-blue-400/60 z-50 pointer-events-none no-print flex flex-col items-center justify-center">
+                <div className="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans font-bold shadow-sm whitespace-nowrap">Ao Centro</div>
               </div>
+            )}
 
-              <div className="flex flex-col font-sans uppercase -space-y-1 text-center items-center">
-                <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-medium tracking-wider text-[#374151] leading-tight block w-fit" />
-                <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[26px] font-extrabold tracking-widest text-[#1e3a8a] leading-tight block w-fit" />
+            {/* Header / Logo Section */}
+            <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
+              <div className="flex w-full justify-center items-center gap-4">
+                <div className="relative group w-[56px] h-[56px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-blue-400 hover:bg-blue-50/30 rounded cursor-pointer transition-all">
+                  <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleLogoUpload} title="Clique para alterar Logotipo" />
+                  {logoImg ? (
+                    <img src={logoImg} className="w-full h-full object-contain pointer-events-none" alt="Logo" />
+                  ) : (
+                    <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
+                       <path d="M20,2 L38,20 L20,38 L2,20 Z" />
+                       <path d="M28,10 L38,20 L28,30" stroke="white" strokeWidth="4" />
+                    </svg>
+                  )}
+                  <div className="absolute -top-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">Trocar Imagem</div>
+                </div>
+
+                <div className="flex flex-col font-sans uppercase -space-y-1 text-center items-center">
+                  <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-medium tracking-wider text-[#374151] leading-tight block w-fit" />
+                  <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[26px] font-extrabold tracking-widest text-[#1e3a8a] leading-tight block w-fit" />
+                </div>
               </div>
-            </div>
+            </DraggableBlock>
 
             {/* Title */}
-            <div className="w-full mt-4 flex justify-center">
-              <ContentEditable 
-                html={title} onChange={(v:any) => handleTextChange(setTitle, v)} onFocus={() => setActiveEditor('title')} onBlur={() => setActiveEditor(null)} as="h1"
-                className="text-[36px] font-bold text-center tracking-[0.1em] text-[#1b365d] uppercase border-b-2 border-[#d4af37] pb-1 px-8" 
-              />
-            </div>
+            <DraggableBlock posKey="cert-pos-title" setSnapGuide={setSnapGuide}>
+              <div className="w-full mt-4 flex justify-center">
+                <ContentEditable 
+                  html={title} onChange={(v:any) => handleTextChange(setTitle, v)} onFocus={() => setActiveEditor('title')} onBlur={() => setActiveEditor(null)} as="h1"
+                  className="text-[36px] font-bold text-center tracking-[0.1em] text-[#1b365d] uppercase border-b-2 border-[#d4af37] pb-1 px-8" 
+                />
+              </div>
+            </DraggableBlock>
 
             {/* Body Paragraphs */}
             <div className="flex flex-col gap-2.5 text-[17px] text-center w-full max-w-[800px] mt-3 text-[#4b5563] leading-[1.4]">
-              <ContentEditable html={line1} onChange={(v:any) => handleTextChange(setLine1, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" />
-              <ContentEditable html={line2} onChange={(v:any) => handleTextChange(setLine2, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" />
-              <ContentEditable html={line3} onChange={(v:any) => handleTextChange(setLine3, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" />
-              <ContentEditable html={line4} onChange={(v:any) => handleTextChange(setLine4, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" />
-              <ContentEditable html={line5} onChange={(v:any) => handleTextChange(setLine5, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full font-semibold" />
+              <DraggableBlock posKey="cert-pos-line1" setSnapGuide={setSnapGuide}><ContentEditable html={line1} onChange={(v:any) => handleTextChange(setLine1, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line2" setSnapGuide={setSnapGuide}><ContentEditable html={line2} onChange={(v:any) => handleTextChange(setLine2, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line3" setSnapGuide={setSnapGuide}><ContentEditable html={line3} onChange={(v:any) => handleTextChange(setLine3, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line4" setSnapGuide={setSnapGuide}><ContentEditable html={line4} onChange={(v:any) => handleTextChange(setLine4, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line5" setSnapGuide={setSnapGuide}><ContentEditable html={line5} onChange={(v:any) => handleTextChange(setLine5, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full font-semibold" /></DraggableBlock>
             </div>
 
             {/* Grades Table */}
-            <div className="w-full max-w-[700px] mt-2 flex flex-col text-[16px] text-[#4b5563] bg-white/50 p-2 rounded">
-              <div className="border-y-[1.5px] border-[#c0b171] py-[4px]">
-                {grades.map((g, i) => (
-                  <div 
-                    key={i} 
-                    className="flex justify-between items-end mb-2 w-full max-w-[600px] group transition-all"
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, i)}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, i)}
-                  >
-                    <div className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing text-gray-300 hover:text-blue-500 mr-2 transition-opacity p-1 no-print">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+            <DraggableBlock posKey="cert-pos-grades" setSnapGuide={setSnapGuide}>
+              <div className="w-full max-w-[700px] mt-2 flex flex-col text-[16px] text-[#4b5563] bg-white/50 p-2 rounded">
+                <div className="border-y-[1.5px] border-[#c0b171] py-[4px]">
+                  {grades.map((g, i) => (
+                    <div 
+                      key={i} 
+                      className="flex justify-between items-end mb-2 w-full max-w-[600px] group/row transition-all"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, i)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, i)}
+                    >
+                      <div className="opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-gray-300 hover:text-blue-500 mr-2 transition-opacity p-1 no-print">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                      </div>
+                      <ContentEditable 
+                        html={g.subject} 
+                        onChange={(v: string) => updateGrade(i, 'subject', v)} 
+                        onFocus={() => setActiveEditor('grades')}
+                        onBlur={() => setActiveEditor(null)}
+                        className="font-serif font-bold text-[14px] text-[#1a2f57] w-[140px] text-left" 
+                      />
+                      <div className="flex-1 border-b-[2px] border-dotted border-gray-400 mx-[4px] mb-[6px] opacity-70"></div>
+                      <ContentEditable 
+                        html={g.percent} 
+                        onChange={(v: string) => updateGrade(i, 'percent', v)} 
+                        onFocus={() => setActiveEditor('grades')}
+                        onBlur={() => setActiveEditor(null)}
+                        className="w-[60px] whitespace-nowrap text-left text-[#374151] font-semibold mr-3" 
+                      />
+                      <ContentEditable 
+                        html={g.spell} 
+                        onChange={(v: string) => updateGrade(i, 'spell', v)} 
+                        onFocus={() => setActiveEditor('grades')}
+                        onBlur={() => setActiveEditor(null)}
+                        className="w-[200px] whitespace-nowrap text-left text-gray-600" 
+                      />
                     </div>
-                    <ContentEditable 
-                      html={g.subject} 
-                      onChange={(v: string) => updateGrade(i, 'subject', v)} 
-                      onFocus={() => setActiveEditor('grades')}
-                      onBlur={() => setActiveEditor(null)}
-                      className="font-serif font-bold text-[14px] text-[#1a2f57] w-[140px] text-left" 
-                    />
-                    <div className="flex-1 border-b-[2px] border-dotted border-gray-400 mx-[4px] mb-[6px] opacity-70"></div>
-                    <ContentEditable 
-                      html={g.percent} 
-                      onChange={(v: string) => updateGrade(i, 'percent', v)} 
-                      onFocus={() => setActiveEditor('grades')}
-                      onBlur={() => setActiveEditor(null)}
-                      className="w-[60px] whitespace-nowrap text-left text-[#374151] font-semibold mr-3" 
-                    />
-                    <ContentEditable 
-                      html={g.spell} 
-                      onChange={(v: string) => updateGrade(i, 'spell', v)} 
-                      onFocus={() => setActiveEditor('grades')}
-                      onBlur={() => setActiveEditor(null)}
-                      className="w-[200px] whitespace-nowrap text-left text-gray-600" 
-                    />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            </DraggableBlock>
 
             {/* Footer / Signatures */}
             <div className="w-full max-w-[800px] flex justify-between px-10 items-end mt-4 relative z-20">
               {/* Left Signature */}
-              <div className="flex flex-col items-center w-64 pt-6 relative">
-                <ContentEditable html={sig1Name} onChange={(v:any) => handleTextChange(setSig1Name, v)} className="font-signature text-[42px] text-[#1a2f57] leading-[0.5] w-full text-center relative z-10" />
-                <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
-                  <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
-                  <div className="flex flex-col items-center mt-1">
-                    <ContentEditable html={sig1Role} onChange={(v:any) => handleTextChange(setSig1Role, v)} className="text-[14px] font-sans font-semibold text-gray-700 pt-0.5" />
+              <DraggableBlock posKey="cert-pos-sig1" setSnapGuide={setSnapGuide}>
+                <div className="flex flex-col items-center w-64 pt-6 relative">
+                  <ContentEditable html={sig1Name} onChange={(v:any) => handleTextChange(setSig1Name, v)} className="font-signature text-[42px] text-[#1a2f57] leading-[0.5] w-full text-center relative z-10" />
+                  <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
+                    <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
+                    <div className="flex flex-col items-center mt-1">
+                      <ContentEditable html={sig1Role} onChange={(v:any) => handleTextChange(setSig1Role, v)} className="text-[14px] font-sans font-semibold text-gray-700 pt-0.5" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </DraggableBlock>
 
               {/* Right Signature (Blank area for stamp and real ink signature) */}
-              <div className="flex flex-col items-center w-64 text-center relative pt-6 mt-10">
-                <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
-                  <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
-                  {/* Text completely removed so physical stamp can be used here without overlapping digital text */}
-                  <div className="h-[48px]"></div>
+              <DraggableBlock posKey="cert-pos-sig2" setSnapGuide={setSnapGuide}>
+                <div className="flex flex-col items-center w-64 text-center relative pt-6 mt-10">
+                  <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
+                    <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
+                    {/* Text completely removed so physical stamp can be used here without overlapping digital text */}
+                    <div className="h-[48px]"></div>
+                  </div>
                 </div>
-              </div>
+              </DraggableBlock>
             </div>
 
           </div>
