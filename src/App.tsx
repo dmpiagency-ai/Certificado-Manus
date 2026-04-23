@@ -339,8 +339,9 @@ export default function App() {
   const [sig1Name, setSig1Name] = useLocalStorage('cert-sig1Name', '');
   const [sig1Role, setSig1Role] = useLocalStorage('cert-sig1Role', '');
 
-  // Derived credits: current user credits or guest credits
-  const currentCredits = user ? (userData?.credits ?? 0) : guestCredits;
+  // Derived credits: only guests consume credits. Authenticated users (admin/developer) export freely.
+  const isAdmin = !!user;
+  const currentCredits = isAdmin ? Infinity : guestCredits;
 
   // Responsive scale: recalculate whenever the window resizes
   const [baseScale, setBaseScale] = useState(1);
@@ -526,18 +527,15 @@ export default function App() {
   };
 
   const deductCredit = async (): Promise<boolean> => {
-    if (currentCredits <= 0) {
+    // ✅ Authenticated users (admin/developer) export without any credit cost
+    if (isAdmin) return true;
+
+    // ❌ Guest (client/end-user) must have credits to export
+    if (guestCredits <= 0) {
       setShowRechargeModal(true);
       return false;
     }
-    if (user) {
-      await updateDoc(doc(db, 'users', user.uid), {
-        credits: Math.max(0, (userData?.credits ?? 1) - 1),
-        updatedAt: serverTimestamp()
-      }).catch(err => console.error('Erro ao actualizar créditos:', err));
-    } else {
-      setGuestCredits(Math.max(0, guestCredits - 1));
-    }
+    setGuestCredits(Math.max(0, guestCredits - 1));
     return true;
   };
 
@@ -685,8 +683,11 @@ export default function App() {
             {user && (
               <div className="flex items-center gap-3 bg-white/5 p-1 pl-4 rounded-xl border border-white/10">
                 <div className="flex flex-col items-end">
-                  <span className="text-white text-xs font-bold leading-none">{userData?.whatsapp || 'Licenciado'}</span>
-                  <span className="text-[#d4af37] text-[10px] font-black uppercase tracking-tighter mt-1">{userData?.credits ?? 0} crédito(s)</span>
+                  <span className="text-white text-xs font-bold leading-none">{userData?.whatsapp || 'Admin'}</span>
+                  <span className="text-green-400 text-[10px] font-black uppercase tracking-tighter mt-1 flex items-center gap-1">
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><circle cx="4" cy="4" r="4" fill="#22c55e"/></svg>
+                    Acesso Livre
+                  </span>
                 </div>
                 <button onClick={handleLogout} className="bg-white/10 hover:bg-red-500/20 p-2 rounded-lg transition-colors group" title="Sair">
                    <RotateCcw className="w-4 h-4 text-white/60 group-hover:text-red-400" />
