@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v12';
+    const CACHE_VERSION = 'v13';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -970,7 +970,7 @@ export default function App() {
 
             {/* Header / Logo Section */}
             <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
-              <div className="flex w-full justify-center items-center gap-6">
+              <div className="flex w-full justify-center items-center gap-3">
                 {/* High-Fidelity Logo Icon */}
                 <div className="relative group w-[64px] h-[64px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
                   <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleLogoUpload} title="Clique para alterar Logotipo" />
