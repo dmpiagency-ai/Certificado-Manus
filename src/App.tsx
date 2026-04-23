@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v15';
+    const CACHE_VERSION = 'v16';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -970,15 +970,14 @@ export default function App() {
 
             {/* Header / Logo Section */}
             <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
-              <div className="flex w-full justify-center items-center gap-1">
-                {/* High-Fidelity Logo Icon */}
-                <div className="relative group w-[64px] h-[64px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
+              <div className="flex w-full justify-center items-center gap-[2px]">
+                {/* Ultimate Fidelity Logo Icon */}
+                <div className="relative group w-[64px] h-[64px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all mr-1">
                   <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleLogoUpload} title="Clique para alterar Logotipo" />
                   {logoImg ? (
                     <img src={logoImg} className="w-full h-full object-contain pointer-events-none" alt="Logo" />
                   ) : (
                     <svg viewBox="0 0 40 40" className="w-[90%] h-[90%] text-[#1a1a1a] pointer-events-none" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                       {/* Faithful Diamond-C from image */}
                        <path d="M28,12 L20,4 L4,20 L20,36 L28,28" />
                     </svg>
                   )}
@@ -986,12 +985,12 @@ export default function App() {
                 </div>
 
                 {/* Vertical Separator Bar */}
-                <div className="w-[2px] h-12 bg-[#1a1a1a] opacity-90"></div>
+                <div className="w-[2px] h-11 bg-[#1a1a1a] opacity-90 mx-1"></div>
 
-                {/* Logo Texts - Maximum Fidelity */}
-                <div className="flex flex-col font-sans uppercase -space-y-2 items-start text-left">
+                {/* Logo Texts - Width Balanced */}
+                <div className="flex flex-col font-sans uppercase -space-y-2 items-start text-left ml-1">
                   <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-extrabold text-[#1a1a1a] tracking-tighter" />
-                  <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-extrabold text-[#1a1a1a] tracking-tighter" />
+                  <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-extrabold text-[#1a1a1a] tracking-[-0.01em]" />
                 </div>
               </div>
             </DraggableBlock>
