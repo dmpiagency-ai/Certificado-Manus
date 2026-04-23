@@ -316,7 +316,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v38';
+    const CACHE_VERSION = 'v39';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -1131,7 +1131,7 @@ export default function App() {
             </DraggableBlock>
 
             {/* Footer / Signatures */}
-            <div className="w-full max-w-[800px] flex justify-between px-10 items-start mt-8 relative z-20">
+            <div className="w-full max-w-[800px] flex justify-between px-10 items-start mt-2 relative z-20">
               {/* Left Signature */}
               <DraggableBlock posKey="cert-pos-sig1" setSnapGuide={setSnapGuide} isLocked={isLocked}>
                 <div className="flex flex-col items-center w-64 pt-6 relative">
