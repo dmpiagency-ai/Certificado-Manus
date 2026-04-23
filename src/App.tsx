@@ -116,67 +116,129 @@ if (typeof window !== 'undefined') {
   setTimeout(() => { if (historyStack.length === 0) saveHistorySnapshot(); }, 1000);
 }
 
-// Draggable Block Wrapper for free positioning (Adobe Illustrator Style)
+// Draggable + Resizable Block Wrapper (Adobe Illustrator Style)
 const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnapGuide }: any) => {
   const [savedPos, setSavedPos] = useLocalStorage<{x: number, y: number}>(posKey, defaultPos);
+  const [savedSize, setSavedSize] = useLocalStorage<{w: number|null, h: number|null}>(`${posKey}-size`, { w: null, h: null });
   
-  // Initialize motion values with saved position
   const x = useMotionValue(savedPos.x);
   const y = useMotionValue(savedPos.y);
+  const blockRef = useRef<HTMLDivElement>(null);
+  const resizing = useRef(false);
+  const resizeStart = useRef({ mouseX: 0, mouseY: 0, w: 0, h: 0 });
+  const [size, setSize] = useState<{w: number|null, h: number|null}>(savedSize);
 
-  // Sync visually when undo/redo changes the savedPos state
+  // Sync position visually when undo/redo fires
   useEffect(() => {
     x.set(savedPos.x);
     y.set(savedPos.y);
   }, [savedPos.x, savedPos.y, x, y]);
+
+  // Sync size from undo/redo
+  useEffect(() => {
+    setSize(savedSize);
+  }, [savedSize.w, savedSize.h]);
   
   const dragControls = useDragControls();
   const [isHovered, setIsHovered] = useState(false);
+
+  // ── Resize logic ──────────────────────────────────────────────────
+  const onResizeMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    resizing.current = true;
+    const rect = blockRef.current?.getBoundingClientRect();
+    resizeStart.current = {
+      mouseX: e.clientX,
+      mouseY: e.clientY,
+      w: rect?.width ?? 300,
+      h: rect?.height ?? 60,
+    };
+    const onMove = (ev: MouseEvent) => {
+      if (!resizing.current) return;
+      const dw = ev.clientX - resizeStart.current.mouseX;
+      const dh = ev.clientY - resizeStart.current.mouseY;
+      const newW = Math.max(80, resizeStart.current.w + dw);
+      const newH = Math.max(24, resizeStart.current.h + dh);
+      setSize({ w: newW, h: newH });
+    };
+    const onUp = () => {
+      resizing.current = false;
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+      setSize(prev => {
+        setSavedSize(prev);
+        setTimeout(() => saveHistorySnapshot(), 10);
+        return prev;
+      });
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
   
   return (
     <motion.div
+      ref={blockRef}
       drag
       dragControls={dragControls}
-      dragListener={false} // Only allow dragging from the handle
+      dragListener={false}
       dragMomentum={false}
-      style={{ x, y, position: 'relative' }} // framer-motion manages visual transform directly
-      onDrag={(e, info) => {
-        // Show guide if near center horizontally
-        if (Math.abs(x.get()) < 15) {
-          if (setSnapGuide) setSnapGuide(true);
-        } else {
-          if (setSnapGuide) setSnapGuide(false);
-        }
+      style={{
+        x, y,
+        position: 'relative',
+        width: size.w ? `${size.w}px` : undefined,
+        minHeight: size.h ? `${size.h}px` : undefined,
       }}
-      onDragEnd={(e, info) => {
+      onDrag={() => {
+        if (Math.abs(x.get()) < 15) { if (setSnapGuide) setSnapGuide(true); }
+        else { if (setSnapGuide) setSnapGuide(false); }
+      }}
+      onDragEnd={() => {
         if (setSnapGuide) setSnapGuide(false);
-        
         let finalX = x.get();
         let finalY = y.get();
-        
-        // Smart Snapping to horizontal center (x=0)
-        if (Math.abs(finalX) < 15) {
-          finalX = 0;
-          x.set(0); // Snap visually immediately without waiting for re-render
-        }
-        
-        // Save final position to localStorage
+        if (Math.abs(finalX) < 15) { finalX = 0; x.set(0); }
         setSavedPos({ x: finalX, y: finalY });
         setTimeout(() => saveHistorySnapshot(), 10);
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group outline-none transition-all w-full flex justify-center ${isHovered ? 'ring-2 ring-dashed ring-[#d4af37]/50 bg-[#d4af37]/5' : ''}`}
+      className={`group outline-none transition-all flex justify-center ${
+        isHovered ? 'ring-2 ring-dashed ring-[#d4af37]/60 bg-[#d4af37]/5' : ''
+      } ${size.w ? '' : 'w-full'}`}
     >
-      {/* Drag Handle */}
+      {/* Drag Handle (top center) */}
       <div 
-        className={`absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-[#112344] rounded-md shadow-lg text-[#d4af37] z-50 cursor-grab active:cursor-grabbing hover:scale-110 no-print`}
+        className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-[#112344] rounded-md shadow-lg text-[#d4af37] z-50 cursor-grab active:cursor-grabbing hover:scale-110 no-print"
         onPointerDown={(e) => dragControls.start(e)}
         title="Arrastar livremente"
       >
         <Move className="w-3.5 h-3.5" />
       </div>
-      {children}
+
+      {/* Resize Handle (bottom right corner) */}
+      {isHovered && (
+        <div
+          className="absolute -bottom-2 -right-2 w-4 h-4 bg-[#d4af37] rounded-sm shadow-md cursor-se-resize z-50 no-print flex items-center justify-center"
+          onMouseDown={onResizeMouseDown}
+          title="Redimensionar"
+        >
+          <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+            <path d="M1 7L7 1M4 7L7 4M7 7V7" stroke="#112344" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+      )}
+
+      {/* Width label shown while hovering */}
+      {isHovered && size.w && (
+        <div className="absolute -top-3 right-0 text-[9px] font-mono text-[#d4af37]/80 bg-[#112344] px-1.5 py-0.5 rounded no-print">
+          {Math.round(size.w)}px
+        </div>
+      )}
+
+      <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+        {children}
+      </div>
     </motion.div>
   );
 };
@@ -671,6 +733,51 @@ export default function App() {
               <div className="w-[1px] h-5 bg-gray-200 mx-1.5"></div>
               <button onMouseDown={(e) => { e.preventDefault(); execFormat('justifyLeft'); }} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Alinhar à Esquerda"><AlignLeft className="w-4 h-4" /></button>
               <button onMouseDown={(e) => { e.preventDefault(); execFormat('justifyCenter'); }} className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all" title="Centralizar"><AlignCenter className="w-4 h-4" /></button>
+              <div className="w-[1px] h-5 bg-gray-200 mx-1.5"></div>
+              {/* Font Size */}
+              <select
+                title="Tamanho da Letra"
+                className="h-8 text-[11px] font-bold text-gray-700 bg-white border border-gray-200 rounded-lg px-1 cursor-pointer focus:outline-none hover:border-[#d4af37] transition-colors"
+                defaultValue=""
+                onMouseDown={(e) => e.stopPropagation()}
+                onChange={(e) => { execFormat('fontSize', e.target.value); e.target.value = ''; }}
+              >
+                <option value="" disabled>Tamanho</option>
+                <option value="1">8px</option>
+                <option value="2">10px</option>
+                <option value="3">12px</option>
+                <option value="4">14px</option>
+                <option value="5">18px</option>
+                <option value="6">24px</option>
+                <option value="7">36px</option>
+              </select>
+              {/* Font Family */}
+              <select
+                title="Fonte"
+                className="h-8 text-[11px] font-bold text-gray-700 bg-white border border-gray-200 rounded-lg px-1 cursor-pointer focus:outline-none hover:border-[#d4af37] transition-colors max-w-[90px]"
+                defaultValue=""
+                onMouseDown={(e) => e.stopPropagation()}
+                onChange={(e) => { execFormat('fontName', e.target.value); e.target.value = ''; }}
+              >
+                <option value="" disabled>Fonte</option>
+                <option value="serif">Serif</option>
+                <option value="sans-serif">Sans-Serif</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Arial">Arial</option>
+                <option value="Palatino Linotype">Palatino</option>
+                <option value="Courier New">Monospace</option>
+              </select>
+              {/* Text Color */}
+              <label className="w-8 h-8 flex items-center justify-center hover:bg-white hover:shadow-sm rounded-lg text-gray-600 transition-all cursor-pointer relative" title="Cor do Texto">
+                <span className="text-[13px] font-extrabold" style={{color:'#374151'}}>A</span>
+                <input
+                  type="color"
+                  className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                  onInput={(e) => execFormat('foreColor', (e.target as HTMLInputElement).value)}
+                />
+                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-4 h-[3px] rounded-full bg-red-500 pointer-events-none"></div>
+              </label>
             </div>
 
             {/* Zoom Controls */}
