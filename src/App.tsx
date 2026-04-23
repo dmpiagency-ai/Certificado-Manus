@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v29';
+    const CACHE_VERSION = 'v30';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -980,18 +980,18 @@ export default function App() {
                   <div className="flex items-center pointer-events-auto z-20">
                     {/* Pixel-Perfect Logo Icon (Rounded Bracket-C) */}
                     <div className="w-[50px] h-[50px] flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 40 40" className="w-full h-full text-[#4b5563]" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg viewBox="0 0 40 40" className="w-full h-full text-[#1b365d]" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                          <path d="M28,8 L18,2 L2,20 L18,38 L28,32" />
                       </svg>
                     </div>
 
                     {/* Thin Vertical Separator - Bolder and Closer */}
-                    <div className="w-[3.5px] h-9 bg-[#4b5563] opacity-100 ml-[-8px] mr-[10px]"></div>
+                    <div className="w-[3.5px] h-9 bg-[#1b365d] opacity-100 ml-[-8px] mr-[10px]"></div>
 
                     {/* Balanced Typography Block */}
                     <div className="flex flex-col font-sans uppercase -space-y-2 items-start text-left">
-                      <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-extrabold text-[#4b5563] tracking-[-0.03em]" />
-                      <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[21.5px] font-extrabold text-[#4b5563] tracking-[0.02em]" />
+                      <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-extrabold text-[#1b365d] tracking-[-0.03em]" />
+                      <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[21.5px] font-extrabold text-[#1b365d] tracking-[0.02em]" />
                     </div>
                   </div>
                 )}
