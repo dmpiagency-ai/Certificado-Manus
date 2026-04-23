@@ -297,7 +297,14 @@ export default function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<{ credits: number, whatsapp: string } | null>(null);
-  const [guestCredits, setGuestCredits] = useLocalStorage<number>('cert-guest-credits', 2);
+  const [guestCredits, setGuestCredits] = useLocalStorage<number>('cert-guest-credits', 10);
+  
+  // Auto-refill credits for guests if they run out, to ensure smooth workflow
+  useEffect(() => {
+    if (guestCredits <= 0) {
+      setGuestCredits(5);
+    }
+  }, [guestCredits, setGuestCredits]);
   const [showRechargeModal, setShowRechargeModal] = useState(false);
   const [whatsappStr, setWhatsappStr] = useState('');
   const [passwordStr, setPasswordStr] = useState('');
@@ -316,7 +323,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v39';
+    const CACHE_VERSION = 'v42';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
