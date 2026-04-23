@@ -316,7 +316,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v37';
+    const CACHE_VERSION = 'v38';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -1069,7 +1069,7 @@ export default function App() {
                   {grades.map((g, i) => (
                     <div 
                       key={i} 
-                      className="flex flex-row items-center justify-center gap-6 mb-2 w-full group/row transition-all relative"
+                      className="flex flex-row items-end justify-center mb-2 w-full max-w-[650px] group/row transition-all relative"
                       draggable={!isLocked}
                       onDragStart={(e) => !isLocked && handleDragStart(e, i)}
                       onDragEnd={handleDragEnd}
@@ -1085,9 +1085,11 @@ export default function App() {
                         onChange={(v: string) => updateGrade(i, 'subject', v)} 
                         onFocus={() => setActiveEditor('grades')}
                         onBlur={() => setActiveEditor(null)}
-                        className="font-bold text-[15px] text-[#1a2f57] w-[140px] text-right uppercase tracking-wider" 
+                        className="font-bold text-[15px] text-[#1a2f57] w-[140px] text-left uppercase tracking-wider" 
                         disabled={isLocked}
                       />
+
+                      <div className="flex-1 border-b-[2px] border-dotted border-[#9ca3af] mx-2 mb-[4px] opacity-40"></div>
 
                       <div className="flex items-center gap-3">
                         <ContentEditable 
@@ -1095,16 +1097,15 @@ export default function App() {
                           onChange={(v: string) => updateGrade(i, 'percent', v)} 
                           onFocus={() => setActiveEditor('grades')}
                           onBlur={() => setActiveEditor(null)}
-                          className="w-[50px] whitespace-nowrap text-center text-[#374151] font-black" 
+                          className="w-[50px] whitespace-nowrap text-right text-[#374151] font-black" 
                           disabled={isLocked}
                         />
-                        <span className="w-1 h-1 rounded-full bg-[#c0b171]/40"></span>
                         <ContentEditable 
                           html={g.spell} 
                           onChange={(v: string) => updateGrade(i, 'spell', v)} 
                           onFocus={() => setActiveEditor('grades')}
                           onBlur={() => setActiveEditor(null)}
-                          className="w-[200px] whitespace-nowrap text-left text-[#4b5563] italic font-medium" 
+                          className="w-[200px] whitespace-nowrap text-left text-[#4b5563] italic font-medium ml-2" 
                           disabled={isLocked}
                         />
                       </div>
