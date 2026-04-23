@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v8';
+    const CACHE_VERSION = 'v9';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -1061,7 +1061,7 @@ export default function App() {
             </DraggableBlock>
 
             {/* Footer / Signatures */}
-            <div className="w-full max-w-[800px] flex justify-between px-10 items-end mt-4 relative z-20">
+            <div className="w-full max-w-[800px] flex justify-between px-10 items-start mt-8 relative z-20">
               {/* Left Signature */}
               <DraggableBlock posKey="cert-pos-sig1" setSnapGuide={setSnapGuide}>
                 <div className="flex flex-col items-center w-64 pt-6 relative">
@@ -1076,7 +1076,7 @@ export default function App() {
 
               {/* Right Signature */}
               <DraggableBlock posKey="cert-pos-sig2" setSnapGuide={setSnapGuide}>
-                <div className="flex flex-col items-center w-64 text-center relative pt-6 mt-10">
+                <div className="flex flex-col items-center w-64 text-center relative pt-6">
                   <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
                     <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
                     <div className="flex flex-col items-center mt-1">
