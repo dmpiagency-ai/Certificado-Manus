@@ -579,10 +579,19 @@ export default function App() {
       element.style.transform = 'scale(1)';
       
       const canvas = await html2canvas(element, {
-        scale: 2, // High resolution
+        scale: 2, // High resolution (renders at 2246x1588)
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        // Force exact A4 dimensions to avoid offset/clipping
+        width: 1123,
+        height: 794,
+        windowWidth: 1123,
+        windowHeight: 794,
+        x: 0,
+        y: 0,
+        scrollX: 0,
+        scrollY: 0
       });
       
       // Restore the scale so UI doesn't break
