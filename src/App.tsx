@@ -555,7 +555,7 @@ export default function App() {
     
     try {
       // Import dynamically to optimize initial bundle size
-      const html2canvas = (await import('html2canvas')).default;
+      const html2canvas = (await import('html2canvas-pro')).default;
       const { jsPDF } = await import('jspdf');
 
       const element = printAreaRef.current;
@@ -954,25 +954,25 @@ export default function App() {
             
             {/* Magnetic Snap Guide */}
             {snapGuide && (
-              <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[2px] bg-blue-400/60 z-50 pointer-events-none no-print flex flex-col items-center justify-center">
-                <div className="bg-blue-500 text-white text-[10px] px-2 py-0.5 rounded-full font-sans font-bold shadow-sm whitespace-nowrap">Ao Centro</div>
+              <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-[2px] bg-[#60a5fa]/60 z-50 pointer-events-none no-print flex flex-col items-center justify-center">
+                <div className="bg-[#3b82f6] text-[#ffffff] text-[10px] px-2 py-0.5 rounded-full font-sans font-bold shadow-sm whitespace-nowrap">Ao Centro</div>
               </div>
             )}
 
             {/* Header / Logo Section */}
             <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
               <div className="flex w-full justify-center items-center gap-4">
-                <div className="relative group w-[56px] h-[56px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-blue-400 hover:bg-blue-50/30 rounded cursor-pointer transition-all">
+                <div className="relative group w-[56px] h-[56px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
                   <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleLogoUpload} title="Clique para alterar Logotipo" />
                   {logoImg ? (
                     <img src={logoImg} className="w-full h-full object-contain pointer-events-none" alt="Logo" />
                   ) : (
-                    <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-[#6b7280] pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
                        <path d="M20,2 L38,20 L20,38 L2,20 Z" />
                        <path d="M28,10 L38,20 L28,30" stroke="white" strokeWidth="4" />
                     </svg>
                   )}
-                  <div className="absolute -top-8 bg-black/80 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">Trocar Imagem</div>
+                  <div className="absolute -top-8 bg-[#000000]/80 text-[#ffffff] text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">Trocar Imagem</div>
                 </div>
 
                 <div className="flex flex-col font-sans uppercase -space-y-1 text-center items-center">
@@ -1003,7 +1003,7 @@ export default function App() {
 
             {/* Grades Table */}
             <DraggableBlock posKey="cert-pos-grades" setSnapGuide={setSnapGuide}>
-              <div className="w-full max-w-[700px] mt-2 flex flex-col text-[16px] text-[#4b5563] bg-white/50 p-2 rounded">
+              <div className="w-full max-w-[700px] mt-2 flex flex-col text-[16px] text-[#4b5563] bg-[#ffffff]/50 p-2 rounded">
                 <div className="border-y-[1.5px] border-[#c0b171] py-[4px]">
                   {grades.map((g, i) => (
                     <div 
@@ -1015,7 +1015,7 @@ export default function App() {
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, i)}
                     >
-                      <div className="opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-gray-300 hover:text-blue-500 mr-2 transition-opacity p-1 no-print">
+                      <div className="opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-[#d1d5db] hover:text-[#3b82f6] mr-2 transition-opacity p-1 no-print">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
                       </div>
                       <ContentEditable 
@@ -1025,7 +1025,7 @@ export default function App() {
                         onBlur={() => setActiveEditor(null)}
                         className="font-serif font-bold text-[14px] text-[#1a2f57] w-[140px] text-left" 
                       />
-                      <div className="flex-1 border-b-[2px] border-dotted border-gray-400 mx-[4px] mb-[6px] opacity-70"></div>
+                      <div className="flex-1 border-b-[2px] border-dotted border-[#9ca3af] mx-[4px] mb-[6px] opacity-70"></div>
                       <ContentEditable 
                         html={g.percent} 
                         onChange={(v: string) => updateGrade(i, 'percent', v)} 
@@ -1038,7 +1038,7 @@ export default function App() {
                         onChange={(v: string) => updateGrade(i, 'spell', v)} 
                         onFocus={() => setActiveEditor('grades')}
                         onBlur={() => setActiveEditor(null)}
-                        className="w-[200px] whitespace-nowrap text-left text-gray-600" 
+                        className="w-[200px] whitespace-nowrap text-left text-[#4b5563]" 
                       />
                     </div>
                   ))}
@@ -1055,7 +1055,7 @@ export default function App() {
                   <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
                     <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
                     <div className="flex flex-col items-center mt-1">
-                      <ContentEditable html={sig1Role} onChange={(v:any) => handleTextChange(setSig1Role, v)} className="text-[14px] font-sans font-semibold text-gray-700 pt-0.5" />
+                      <ContentEditable html={sig1Role} onChange={(v:any) => handleTextChange(setSig1Role, v)} className="text-[14px] font-sans font-semibold text-[#374151] pt-0.5" />
                     </div>
                   </div>
                 </div>
