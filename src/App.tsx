@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v10';
+    const CACHE_VERSION = 'v11';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -972,26 +972,26 @@ export default function App() {
             <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
               <div className="flex w-full justify-center items-center gap-5">
                 {/* Logo Icon */}
-                <div className="relative group w-[60px] h-[60px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
+                <div className="relative group w-[56px] h-[56px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
                   <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleLogoUpload} title="Clique para alterar Logotipo" />
                   {logoImg ? (
                     <img src={logoImg} className="w-full h-full object-contain pointer-events-none" alt="Logo" />
                   ) : (
-                    <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-[#4b5563] pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
-                       {/* Stylized Diamond Icon from image */}
-                       <path d="M12,20 L20,12 L32,24 L20,36 L12,28" strokeLinecap="round" strokeLinejoin="round" />
+                    <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-[#6b7280] pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
+                       {/* Precise Diamond with opening from image */}
+                       <path d="M12,20 L20,12 L32,20 L20,28 L12,20" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   )}
                   <div className="absolute -top-8 bg-[#000000]/80 text-[#ffffff] text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">Trocar Imagem</div>
                 </div>
 
                 {/* Vertical Separator Bar */}
-                <div className="w-[1.5px] h-10 bg-[#9ca3af] opacity-60"></div>
+                <div className="w-[1.2px] h-10 bg-[#9ca3af] opacity-40"></div>
 
                 {/* Logo Texts grouped and aligned left */}
-                <div className="flex flex-col font-sans uppercase -space-y-1.5 items-start text-left">
-                  <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-bold text-[#374151] tracking-tight" />
-                  <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-bold text-[#374151] tracking-tight" />
+                <div className="flex flex-col font-sans uppercase -space-y-2 items-start text-left">
+                  <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[19px] font-bold text-[#4b5563] tracking-tighter" />
+                  <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[19px] font-bold text-[#4b5563] tracking-tighter" />
                 </div>
               </div>
             </DraggableBlock>
