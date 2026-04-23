@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v6';
+    const CACHE_VERSION = 'v7';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -327,7 +327,7 @@ export default function App() {
   });
 
   const [logoImg, setLogoImg] = useLocalStorage<string | null>('cert-logoImg', null);
-  const [logoText1, setLogoText1] = useLocalStorage('cert-logoText1', '<strong>COMUNIDADE</strong>&nbsp;|');
+  const [logoText1, setLogoText1] = useLocalStorage('cert-logoText1', 'COMUNIDADE');
   const [logoText2, setLogoText2] = useLocalStorage('cert-logoText2', 'DE LÍNGUAS');
   const [title, setTitle] = useLocalStorage('cert-title', 'CERTIFICATE');
 
@@ -970,23 +970,28 @@ export default function App() {
 
             {/* Header / Logo Section */}
             <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
-              <div className="flex w-full justify-center items-center gap-4">
-                <div className="relative group w-[56px] h-[56px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
+              <div className="flex w-full justify-center items-center gap-5">
+                {/* Logo Icon */}
+                <div className="relative group w-[60px] h-[60px] flex items-center justify-center shrink-0 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
                   <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-10" onChange={handleLogoUpload} title="Clique para alterar Logotipo" />
                   {logoImg ? (
                     <img src={logoImg} className="w-full h-full object-contain pointer-events-none" alt="Logo" />
                   ) : (
-                    <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-[#6b7280] pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
-                       <path d="M20,2 L38,20 L20,38 L2,20 Z" />
-                       <path d="M28,10 L38,20 L28,30" stroke="white" strokeWidth="4" />
+                    <svg viewBox="0 0 40 40" className="w-[85%] h-[85%] text-[#4b5563] pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2.5">
+                       {/* Stylized Diamond Icon from image */}
+                       <path d="M12,20 L20,12 L32,24 L20,36 L12,28" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   )}
                   <div className="absolute -top-8 bg-[#000000]/80 text-[#ffffff] text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">Trocar Imagem</div>
                 </div>
 
-                <div className="flex flex-col font-sans uppercase -space-y-1 text-center items-center">
-                  <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-medium tracking-wider text-[#374151] leading-tight block w-fit" />
-                  <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[26px] font-extrabold tracking-widest text-[#1e3a8a] leading-tight block w-fit" />
+                {/* Vertical Separator Bar */}
+                <div className="w-[1.5px] h-10 bg-[#9ca3af] opacity-60"></div>
+
+                {/* Logo Texts grouped and aligned left */}
+                <div className="flex flex-col font-sans uppercase -space-y-1.5 items-start text-left">
+                  <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-bold text-[#374151] tracking-tight" />
+                  <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-bold text-[#374151] tracking-tight" />
                 </div>
               </div>
             </DraggableBlock>
