@@ -108,6 +108,10 @@ export const redoHistory = () => {
 if (typeof window !== 'undefined') {
   window.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+      const activeEl = document.activeElement as HTMLElement;
+      if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+        return; // Allow native browser undo/redo for text editing
+      }
       e.preventDefault();
       if (e.shiftKey) redoHistory();
       else undoHistory();
@@ -236,7 +240,7 @@ const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnap
         </div>
       )}
 
-      <div style={{ width: '100%', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+      <div style={{ width: '100%', overflowWrap: 'break-word' }}>
         {children}
       </div>
     </motion.div>
