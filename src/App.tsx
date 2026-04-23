@@ -245,34 +245,37 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v3';
+    const CACHE_VERSION = 'v4';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       ['cert-logoText1','cert-logoText2','cert-title','cert-line1','cert-line2',
        'cert-line3','cert-line4','cert-line5','cert-sig1Name','cert-sig1Role',
-       'cert-grades','cert-logoImg', 'cert-guest-credits'].forEach(k => window.localStorage.removeItem(k));
+       'cert-grades','cert-logoImg', 'cert-guest-credits',
+       'cert-pos-header','cert-pos-title','cert-pos-line1','cert-pos-line2',
+       'cert-pos-line3','cert-pos-line4','cert-pos-line5','cert-pos-grades',
+       'cert-pos-sig1','cert-pos-sig2'].forEach(k => window.localStorage.removeItem(k));
       window.localStorage.setItem('cert-cache-version', CACHE_VERSION);
     }
   });
 
   const [logoImg, setLogoImg] = useLocalStorage<string | null>('cert-logoImg', null);
-  const [logoText1, setLogoText1] = useLocalStorage('cert-logoText1', 'COMUNIDADE');
+  const [logoText1, setLogoText1] = useLocalStorage('cert-logoText1', '<strong>COMUNIDADE</strong>&nbsp;|');
   const [logoText2, setLogoText2] = useLocalStorage('cert-logoText2', 'DE LÍNGUAS');
   const [title, setTitle] = useLocalStorage('cert-title', 'CERTIFICATE');
 
-  const [line1, setLine1] = useLocalStorage('cert-line1', 'Efigenio Cardiga José Vuma, headmaster of Language Comunity School Certifies that <strong style="color: #374151;">José Walter Jacinto Mondlane</strong>');
-  const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on 8<sup>th</sup> March 2000 with ID Nº 110102168298S Issued on 25 / 07 / 2024 In Maputo City .');
-  const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Maputo province: Maputo Parents : Jacinto José Mondlane and Mónica Ailina Zunguze Matsinhe');
-  const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, he was submitted to the final exams in 2026 (two thousand and twenty-six )');
+  const [line1, setLine1] = useLocalStorage('cert-line1', 'Efigenio Cardiga José Vuma, headmaster of Language Community School Certifies that <strong style="color: #374151;">Maria Das Dores Marcelino Mussa</strong>');
+  const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on 9<sup>th</sup> March 2006 with BI Nº 0701062860610 Issued on 18 / 08 / 2022 In Cidade Da Beira .');
+  const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Beira &nbsp; Parents: Marcelino Mussa and Estrela Custavo Vilanculo');
+  const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in 2026 (two thousand and twenty-six )');
   const [line5, setLine5] = useLocalStorage('cert-line5', 'Having got the following classification');
   
   const [grades, setGrades] = useLocalStorage('cert-grades', [
-    { subject: 'Writing', percent: '65 %', spell: 'sixty five percent' },
-    { subject: 'Speaking', percent: '70 %', spell: 'seventy percent' },
-    { subject: 'Average', percent: '65 %', spell: 'Sixty five percent' }
+    { subject: 'Writing', percent: '65 %', spell: 'Sixty Five Percent' },
+    { subject: 'Speaking', percent: '70 %', spell: 'Seventy Percent' },
+    { subject: 'Average', percent: '65 %', spell: 'Sixty Five Percent' }
   ]);
 
-  const [sig1Name, setSig1Name] = useLocalStorage('cert-sig1Name', 'Sebastião Mário Chichava');
-  const [sig1Role, setSig1Role] = useLocalStorage('cert-sig1Role', 'Academic department');
+  const [sig1Name, setSig1Name] = useLocalStorage('cert-sig1Name', '');
+  const [sig1Role, setSig1Role] = useLocalStorage('cert-sig1Role', '');
 
   // Derived credits: current user credits or guest credits
   const currentCredits = user ? (userData?.credits ?? 0) : guestCredits;
