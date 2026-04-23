@@ -323,7 +323,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v42';
+    const CACHE_VERSION = 'v43';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -613,7 +613,18 @@ export default function App() {
       
       // A4 landscape dimensions: 297x210 mm
       pdf.addImage(imgData, 'PNG', 0, 0, 297, 210);
-      pdf.save('Certificado-Manus.pdf');
+
+      // Dynamic naming based on student name (extract from line1)
+      const matches = line1.match(/<strong[^>]*>(.*?)<\/strong>/gi);
+      let studentName = 'Manus';
+      if (matches && matches.length >= 2) {
+        studentName = matches[1].replace(/<[^>]*>/g, '').trim();
+      } else if (matches && matches.length === 1) {
+        studentName = matches[0].replace(/<[^>]*>/g, '').trim();
+      }
+      
+      const safeName = studentName.replace(/[^a-z0-9]/gi, '_').replace(/_+/g, '_').substring(0, 30);
+      pdf.save(`Certificado_${safeName}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Ocorreu um erro ao gerar o PDF. Verifique a sua ligação ou tente novamente.');
