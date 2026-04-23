@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v23';
+    const CACHE_VERSION = 'v24';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -970,42 +970,34 @@ export default function App() {
 
             {/* Header / Logo Section */}
             <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
-              <div className="relative group flex items-center justify-center p-2 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
-                {/* File input covering the entire logo symbol */}
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="absolute inset-0 opacity-0 cursor-pointer z-30" 
-                  onChange={handleLogoUpload} 
-                  title="Clique para carregar Logotipo Completo (substitui texto e ícone)" 
-                />
+              <div className="relative group flex items-center justify-center py-2 px-4 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
+                {/* Unified File Input */}
+                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-30" onChange={handleLogoUpload} title="Carregar Logotipo" />
 
                 {logoImg ? (
-                  <div className="relative z-10">
-                    <img src={logoImg} className="max-h-[80px] w-auto object-contain pointer-events-none" alt="Logo" />
-                  </div>
+                  <img src={logoImg} className="max-h-[75px] w-auto object-contain pointer-events-none z-10" alt="Logo" />
                 ) : (
-                  <div className="flex items-center pointer-events-auto relative z-20">
-                    {/* Rigorous Fidelity Logo Icon */}
-                    <div className="w-[60px] h-[60px] flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 40 40" className="w-[90%] h-[90%] text-[#1a1a1a]" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                         <path d="M28,12 C24,8 22,6 20,6 C18,6 16,8 10,14 C6,18 4,20 4,22 C4,24 6,26 10,30 C16,36 18,38 20,38 C22,38 24,36 28,32" />
+                  <div className="flex items-center pointer-events-auto z-20">
+                    {/* Pixel-Perfect Logo Icon (Rounded Bracket-C) */}
+                    <div className="w-[50px] h-[50px] flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 40 40" className="w-full h-full text-[#4b5563]" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                         <path d="M28,8 L18,2 L2,20 L18,38 L28,32" />
                       </svg>
                     </div>
 
-                    {/* Vertical Separator Bar */}
-                    <div className="w-[2.5px] h-10 bg-[#1a1a1a] opacity-95 mx-[2px]"></div>
+                    {/* Thin Vertical Separator */}
+                    <div className="w-[1.2px] h-9 bg-[#4b5563] opacity-40 ml-[8px] mr-[10px]"></div>
 
-                    {/* Logo Texts */}
-                    <div className="flex flex-col font-sans uppercase -space-y-1.2 items-start text-left ml-[3px]">
-                      <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-extrabold text-[#1a1a1a] tracking-tighter" />
-                      <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-extrabold text-[#1a1a1a] tracking-[-0.02em]" />
+                    {/* Balanced Typography Block */}
+                    <div className="flex flex-col font-sans uppercase -space-y-2 items-start text-left">
+                      <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-extrabold text-[#4b5563] tracking-[-0.03em]" />
+                      <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-extrabold text-[#4b5563] tracking-[0.02em]" />
                     </div>
                   </div>
                 )}
-                
+
                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#000000]/80 text-[#ffffff] text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-40">
-                  {logoImg ? 'Trocar Logotipo' : 'Substituir por Imagem'}
+                  Substituir por Imagem
                 </div>
               </div>
             </DraggableBlock>
