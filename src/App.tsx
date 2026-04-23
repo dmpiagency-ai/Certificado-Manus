@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v28';
+    const CACHE_VERSION = 'v29';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -1007,7 +1007,7 @@ export default function App() {
               <div className="w-full mt-4 flex justify-center">
                 <ContentEditable 
                   html={title} onChange={(v:any) => handleTextChange(setTitle, v)} onFocus={() => setActiveEditor('title')} onBlur={() => setActiveEditor(null)} as="h1"
-                  className="text-[36px] font-bold text-center tracking-[0.1em] text-[#1b365d] uppercase border-b-2 border-[#d4af37] pb-1 px-8" 
+                  className="text-[36px] font-bold text-center tracking-[0.1em] text-[#1b365d] uppercase" 
                 />
               </div>
             </DraggableBlock>
