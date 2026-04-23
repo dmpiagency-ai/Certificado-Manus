@@ -316,7 +316,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v35';
+    const CACHE_VERSION = 'v36';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -1064,54 +1064,59 @@ export default function App() {
 
             {/* Grades Table */}
             <DraggableBlock posKey="cert-pos-grades" setSnapGuide={setSnapGuide} isLocked={isLocked}>
-              <div className="w-full max-w-[700px] mt-2 flex flex-col text-[16px] text-[#4b5563] bg-[#ffffff]/50 p-2 rounded">
-                <div className="border-y-[1.5px] border-[#c0b171] py-[4px]">
+              <div className="w-full max-w-[700px] mt-4 flex flex-col text-[16px] text-[#4b5563] bg-[#ffffff]/50 p-4 rounded-xl border border-gray-100 shadow-sm">
+                <div className="border-y-[1.5px] border-[#c0b171] py-6 flex flex-col items-center">
                   {grades.map((g, i) => (
                     <div 
                       key={i} 
-                      className="flex justify-between items-end mb-2 w-full max-w-[600px] group/row transition-all"
+                      className="flex flex-col items-center mb-8 last:mb-0 w-full group/row transition-all relative"
                       draggable={!isLocked}
                       onDragStart={(e) => !isLocked && handleDragStart(e, i)}
                       onDragEnd={handleDragEnd}
                       onDragOver={handleDragOver}
                       onDrop={(e) => !isLocked && handleDrop(e, i)}
                     >
-                      <div className={`opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-[#d1d5db] hover:text-[#3b82f6] mr-2 transition-opacity p-1 no-print ${isLocked ? 'hidden' : ''}`}>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                      <div className={`absolute -left-12 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-[#d1d5db] hover:text-[#3b82f6] transition-opacity p-2 no-print ${isLocked ? 'hidden' : ''}`}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
                       </div>
+
                       <ContentEditable 
                         html={g.subject} 
                         onChange={(v: string) => updateGrade(i, 'subject', v)} 
                         onFocus={() => setActiveEditor('grades')}
                         onBlur={() => setActiveEditor(null)}
-                        className="font-serif font-bold text-[14px] text-[#1a2f57] w-[140px] text-left" 
+                        className="text-[20px] font-bold text-[#1b365d] tracking-widest mb-1 uppercase" 
                         disabled={isLocked}
                       />
-                      <div className="flex-1 border-b-[2px] border-dotted border-[#9ca3af] mx-[4px] mb-[6px] opacity-70"></div>
-                      <ContentEditable 
-                        html={g.percent} 
-                        onChange={(v: string) => updateGrade(i, 'percent', v)} 
-                        onFocus={() => setActiveEditor('grades')}
-                        onBlur={() => setActiveEditor(null)}
-                        className="w-[60px] whitespace-nowrap text-left text-[#374151] font-semibold mr-3" 
-                        disabled={isLocked}
-                      />
-                      <ContentEditable 
-                        html={g.spell} 
-                        onChange={(v: string) => updateGrade(i, 'spell', v)} 
-                        onFocus={() => setActiveEditor('grades')}
-                        onBlur={() => setActiveEditor(null)}
-                        className="w-[200px] whitespace-nowrap text-left text-[#4b5563]" 
-                        disabled={isLocked}
-                      />
+                      
+                      <div className="flex items-center gap-4 text-[17px] text-[#4b5563]">
+                        <ContentEditable 
+                          html={g.percent} 
+                          onChange={(v: string) => updateGrade(i, 'percent', v)} 
+                          onFocus={() => setActiveEditor('grades')}
+                          onBlur={() => setActiveEditor(null)}
+                          className="font-black text-[#1b365d] text-lg" 
+                          disabled={isLocked}
+                        />
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#c0b171]"></span>
+                        <ContentEditable 
+                          html={g.spell} 
+                          onChange={(v: string) => updateGrade(i, 'spell', v)} 
+                          onFocus={() => setActiveEditor('grades')}
+                          onBlur={() => setActiveEditor(null)}
+                          className="italic font-medium text-gray-400" 
+                          disabled={isLocked}
+                        />
+                      </div>
 
                       {!isLocked && (
-                        <button onClick={() => removeGrade(i)} className="opacity-0 group-hover/row:opacity-100 text-red-300 hover:text-red-500 ml-2 transition-opacity no-print">
-                           <X className="w-4 h-4" />
+                        <button onClick={() => removeGrade(i)} className="absolute -right-12 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 text-red-300 hover:text-red-500 transition-opacity p-2 no-print">
+                           <X className="w-5 h-5" />
                         </button>
                       )}
                     </div>
                   ))}
+                  
                   {!isLocked && (
                     <button 
                       onClick={addGrade}
