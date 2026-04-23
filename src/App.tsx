@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v16';
+    const CACHE_VERSION = 'v17';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -331,7 +331,7 @@ export default function App() {
   const [logoText2, setLogoText2] = useLocalStorage('cert-logoText2', 'DE LÍNGUAS');
   const [title, setTitle] = useLocalStorage('cert-title', 'CERTIFICATE');
 
-  const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Albino Rafael Armando</strong>, headmaster of Language Community School Certifies that <strong style="color: #374151;">Maria Das Dores Marcelino Mussa</strong>');
+  const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Albino Rafael Armando</strong>, headmaster of Languages Community School Certifies that <strong style="color: #374151;">Maria Das Dores Marcelino Mussa</strong>');
   const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on 9<sup>th</sup> March 2006 with BI Nº 0701062860610 Issued on 18 / 08 / 2022 In Cidade Da Beira .');
   const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Beira &nbsp; Parents: Marcelino Mussa and Estrela Custavo Vilanculo');
   const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in 2026 (Two Thousand And Twenty-Six)');
