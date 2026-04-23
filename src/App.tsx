@@ -311,14 +311,17 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v4';
+    const CACHE_VERSION = 'v5';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
-      ['cert-logoText1','cert-logoText2','cert-title','cert-line1','cert-line2',
-       'cert-line3','cert-line4','cert-line5','cert-sig1Name','cert-sig1Role',
-       'cert-grades','cert-logoImg', 'cert-guest-credits',
-       'cert-pos-header','cert-pos-title','cert-pos-line1','cert-pos-line2',
-       'cert-pos-line3','cert-pos-line4','cert-pos-line5','cert-pos-grades',
-       'cert-pos-sig1','cert-pos-sig2'].forEach(k => window.localStorage.removeItem(k));
+      // Clear all cert keys except guest credits to do a full factory reset of the layout
+      const keysToRemove = [];
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const key = window.localStorage.key(i);
+        if (key && key.startsWith('cert-') && key !== 'cert-guest-credits') {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => window.localStorage.removeItem(k));
       window.localStorage.setItem('cert-cache-version', CACHE_VERSION);
     }
   });
