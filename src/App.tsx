@@ -284,7 +284,7 @@ const ContentEditable = ({ html, onChange, className = "", tagName = 'div', onFo
       ref={contentEditableRef}
       contentEditable={!disabled}
       suppressContentEditableWarning
-      className={`outline-none ${!disabled ? 'hover:shadow-[0_0_0_2px_rgba(59,130,246,0.3)] focus:shadow-[0_0_0_2px_rgba(59,130,246,0.9)] focus:bg-blue-50/30 rounded transition-all cursor-text' : ''} min-w-[20px] empty:before:content-['(vazio)'] empty:before:text-gray-300 empty:before:italic block md:inline-block ${className}`}
+      className={`outline-none ${!disabled ? 'hover:shadow-[0_0_0_2px_rgba(59,130,246,0.3)] focus:shadow-[0_0_0_2px_rgba(59,130,246,0.9)] focus:bg-blue-50/30 rounded transition-all cursor-text' : ''} min-w-[20px] block md:inline-block ${className}`}
       onBlur={handleBlur}
       onFocus={handleFocus}
       onInput={handleInput}
@@ -316,7 +316,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v31';
+    const CACHE_VERSION = 'v32';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
