@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v26';
+    const CACHE_VERSION = 'v27';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -985,8 +985,8 @@ export default function App() {
                       </svg>
                     </div>
 
-                    {/* Thin Vertical Separator */}
-                    <div className="w-[1.2px] h-9 bg-[#4b5563] opacity-40 ml-[-4px] mr-[10px]"></div>
+                    {/* Thin Vertical Separator - Bolder and Closer */}
+                    <div className="w-[3.5px] h-9 bg-[#4b5563] opacity-100 ml-[-8px] mr-[10px]"></div>
 
                     {/* Balanced Typography Block */}
                     <div className="flex flex-col font-sans uppercase -space-y-2 items-start text-left">
