@@ -316,7 +316,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v34';
+    const CACHE_VERSION = 'v35';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -337,9 +337,9 @@ export default function App() {
   const [title, setTitle] = useLocalStorage('cert-title', 'CERTIFICATE');
 
   const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Albino Rafael Armando</strong>, headmaster of Languages Community School Certifies that <strong style="white-space: nowrap; color: #374151;">Maria Das Dores Marcelino Mussa</strong>');
-  const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on the 9<sup>th</sup> March 2006 with BI Nº 0701062860610 Issued on the 18 / 08 / 2022 In Beira City.');
+  const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on the 9<sup>th</sup> March 2006 with BI Nº 0701062860610 Issued on the 18<sup>th</sup> August 2022 In Beira City.');
   const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Beira &nbsp; Parents: Marcelino Mussa and Estrela Custavo Vilanculo');
-  const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in 2026 (Two Thousand And Twenty-Six)');
+  const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in the year 2026 (Two Thousand and Twenty-Six)');
   const [line5, setLine5] = useLocalStorage('cert-line5', 'Having got the following classification');
   
   const [grades, setGrades] = useLocalStorage('cert-grades', [
@@ -1054,7 +1054,7 @@ export default function App() {
             </DraggableBlock>
 
             {/* Body Paragraphs */}
-            <div className="flex flex-col gap-2.5 text-[17px] text-center w-full max-w-[800px] mt-3 text-[#4b5563] leading-[1.4]">
+            <div className="flex flex-col gap-2.5 text-[17px] text-center w-full max-w-[900px] mt-3 text-[#4b5563] leading-[1.6]">
               <DraggableBlock posKey="cert-pos-line1" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line1} onChange={(v:any) => handleTextChange(setLine1, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" disabled={isLocked} /></DraggableBlock>
               <DraggableBlock posKey="cert-pos-line2" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line2} onChange={(v:any) => handleTextChange(setLine2, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" disabled={isLocked} /></DraggableBlock>
               <DraggableBlock posKey="cert-pos-line3" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line3} onChange={(v:any) => handleTextChange(setLine3, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" disabled={isLocked} /></DraggableBlock>
