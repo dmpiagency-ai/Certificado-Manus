@@ -27,7 +27,9 @@ import {
   List,
   Wand2,
   Printer,
-  Move
+  Move,
+  Lock,
+  LockOpen
 } from 'lucide-react';
 import { motion, useDragControls, useMotionValue } from 'framer-motion';
 
@@ -121,7 +123,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Draggable + Resizable Block Wrapper (Adobe Illustrator Style)
-const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnapGuide }: any) => {
+const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnapGuide, isLocked }: any) => {
   const [savedPos, setSavedPos] = useLocalStorage<{x: number, y: number}>(posKey, defaultPos);
   const [savedSize, setSavedSize] = useLocalStorage<{w: number|null, h: number|null}>(`${posKey}-size`, { w: null, h: null });
   
@@ -183,7 +185,7 @@ const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnap
   return (
     <motion.div
       ref={blockRef}
-      drag
+      drag={isLocked ? false : true}
       dragControls={dragControls}
       dragListener={false}
       dragMomentum={false}
@@ -205,23 +207,25 @@ const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnap
         setSavedPos({ x: finalX, y: finalY });
         setTimeout(() => saveHistorySnapshot(), 10);
       }}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => !isLocked && setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`group outline-none transition-all flex justify-center ${
-        isHovered ? 'ring-2 ring-dashed ring-[#d4af37]/60 bg-[#d4af37]/5' : ''
+        !isLocked && isHovered ? 'ring-2 ring-dashed ring-[#d4af37]/60 bg-[#d4af37]/5' : ''
       } ${size.w ? '' : 'w-full'}`}
     >
       {/* Drag Handle (top center) */}
-      <div 
-        className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-[#112344] rounded-md shadow-lg text-[#d4af37] z-50 cursor-grab active:cursor-grabbing hover:scale-110 no-print"
-        onPointerDown={(e) => dragControls.start(e)}
-        title="Arrastar livremente"
-      >
-        <Move className="w-3.5 h-3.5" />
-      </div>
+      {!isLocked && (
+        <div 
+          className="absolute -top-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity p-1 bg-[#112344] rounded-md shadow-lg text-[#d4af37] z-50 cursor-grab active:cursor-grabbing hover:scale-110 no-print"
+          onPointerDown={(e) => dragControls.start(e)}
+          title="Arrastar livremente"
+        >
+          <Move className="w-3.5 h-3.5" />
+        </div>
+      )}
 
       {/* Resize Handle (bottom right corner) */}
-      {isHovered && (
+      {!isLocked && isHovered && (
         <div
           className="absolute -bottom-2 -right-2 w-4 h-4 bg-[#d4af37] rounded-sm shadow-md cursor-se-resize z-50 no-print flex items-center justify-center"
           onMouseDown={onResizeMouseDown}
@@ -234,7 +238,7 @@ const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnap
       )}
 
       {/* Width label shown while hovering */}
-      {isHovered && size.w && (
+      {!isLocked && isHovered && size.w && (
         <div className="absolute -top-3 right-0 text-[9px] font-mono text-[#d4af37]/80 bg-[#112344] px-1.5 py-0.5 rounded no-print">
           {Math.round(size.w)}px
         </div>
@@ -247,7 +251,7 @@ const DraggableBlock = ({ children, posKey, defaultPos = { x: 0, y: 0 }, setSnap
   );
 };
 
-const ContentEditable = ({ html, onChange, className = "", tagName = 'div', onFocus, onBlur }: any) => {
+const ContentEditable = ({ html, onChange, className = "", tagName = 'div', onFocus, onBlur, disabled }: any) => {
   const contentEditableRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -278,9 +282,9 @@ const ContentEditable = ({ html, onChange, className = "", tagName = 'div', onFo
   return (
     <Tag
       ref={contentEditableRef}
-      contentEditable
+      contentEditable={!disabled}
       suppressContentEditableWarning
-      className={`outline-none hover:shadow-[0_0_0_2px_rgba(59,130,246,0.3)] focus:shadow-[0_0_0_2px_rgba(59,130,246,0.9)] focus:bg-blue-50/30 rounded transition-all cursor-text min-w-[20px] empty:before:content-['(vazio)'] empty:before:text-gray-300 empty:before:italic block md:inline-block ${className}`}
+      className={`outline-none ${!disabled ? 'hover:shadow-[0_0_0_2px_rgba(59,130,246,0.3)] focus:shadow-[0_0_0_2px_rgba(59,130,246,0.9)] focus:bg-blue-50/30 rounded transition-all cursor-text' : ''} min-w-[20px] empty:before:content-['(vazio)'] empty:before:text-gray-300 empty:before:italic block md:inline-block ${className}`}
       onBlur={handleBlur}
       onFocus={handleFocus}
       onInput={handleInput}
@@ -306,12 +310,13 @@ export default function App() {
   const [activeEditor, setActiveEditor] = useState<string | null>(null);
   const [draggedGradeIdx, setDraggedGradeIdx] = useState<number | null>(null);
   const [snapGuide, setSnapGuide] = useState(false);
+  const [isLocked, setIsLocked] = useState(true);
   const printAreaRef = useRef<HTMLDivElement>(null);
 
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v30';
+    const CACHE_VERSION = 'v31';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -682,7 +687,29 @@ export default function App() {
             </div>
          </div>
          
-         <div className="flex gap-4 items-center">
+         <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsLocked(!isLocked)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold transition-all shadow-md active:scale-95 ${
+                  isLocked 
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200' 
+                    : 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-200 animate-pulse'
+                }`}
+                title={isLocked ? "Desbloquear para editar" : "Bloquear e ver Preview"}
+              >
+                {isLocked ? <Lock className="w-4 h-4" /> : <LockOpen className="w-4 h-4" />}
+                {isLocked ? 'Modo Preview (Bloqueado)' : 'Modo Edição (Livre)'}
+              </button>
+
+              <div className="h-8 w-px bg-gray-200 mx-1"></div>
+              
+              <div className="flex items-center bg-gray-50/80 px-3 py-1.5 rounded-xl border border-gray-100 shadow-sm">
+                <span className="text-[10px] uppercase font-black text-gray-400 mr-2 tracking-widest">Créditos</span>
+                <span className={`text-base font-black ${isAdmin ? 'text-blue-600' : 'text-gray-900'}`}>
+                   {isAdmin ? 'Acesso Livre' : currentCredits}
+                </span>
+              </div>
+            </div>      <div className="flex gap-4 items-center">
             {isSaving && (
               <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-500/10 border border-blue-500/20 rounded-md animate-pulse">
                 <Loader2 className="w-3 h-3 text-blue-400 animate-spin" />
@@ -969,10 +996,12 @@ export default function App() {
             )}
 
             {/* Header / Logo Section */}
-            <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide}>
+            <DraggableBlock posKey="cert-pos-header" setSnapGuide={setSnapGuide} isLocked={isLocked}>
               <div className="relative group flex items-center justify-center py-2 px-4 border-2 border-transparent hover:border-[#60a5fa] hover:bg-[#eff6ff]/30 rounded cursor-pointer transition-all">
                 {/* Unified File Input */}
-                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-30" onChange={handleLogoUpload} title="Carregar Logotipo" />
+                {!isLocked && (
+                  <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer z-30" onChange={handleLogoUpload} title="Carregar Logotipo" />
+                )}
 
                 {logoImg ? (
                   <img src={logoImg} className="max-h-[75px] w-auto object-contain pointer-events-none z-10" alt="Logo" />
@@ -990,52 +1019,55 @@ export default function App() {
 
                     {/* Balanced Typography Block */}
                     <div className="flex flex-col font-sans uppercase -space-y-2 items-start text-left">
-                      <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-extrabold text-[#1b365d] tracking-[-0.03em]" />
-                      <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[21.5px] font-extrabold text-[#1b365d] tracking-[0.02em]" />
+                      <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[20px] font-extrabold text-[#1b365d] tracking-[-0.03em]" disabled={isLocked} />
+                      <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[21.5px] font-extrabold text-[#1b365d] tracking-[0.02em]" disabled={isLocked} />
                     </div>
                   </div>
                 )}
 
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#000000]/80 text-[#ffffff] text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-40">
-                  Substituir por Imagem
-                </div>
+                {!isLocked && (
+                  <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#000000]/80 text-[#ffffff] text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity z-40">
+                    Substituir por Imagem
+                  </div>
+                )}
               </div>
             </DraggableBlock>
 
             {/* Title */}
-            <DraggableBlock posKey="cert-pos-title" setSnapGuide={setSnapGuide}>
+            <DraggableBlock posKey="cert-pos-title" setSnapGuide={setSnapGuide} isLocked={isLocked}>
               <div className="w-full mt-4 flex justify-center">
                 <ContentEditable 
                   html={title} onChange={(v:any) => handleTextChange(setTitle, v)} onFocus={() => setActiveEditor('title')} onBlur={() => setActiveEditor(null)} as="h1"
                   className="text-[36px] font-bold text-center tracking-[0.1em] text-[#1b365d] uppercase" 
+                  disabled={isLocked}
                 />
               </div>
             </DraggableBlock>
 
             {/* Body Paragraphs */}
             <div className="flex flex-col gap-2.5 text-[17px] text-center w-full max-w-[800px] mt-3 text-[#4b5563] leading-[1.4]">
-              <DraggableBlock posKey="cert-pos-line1" setSnapGuide={setSnapGuide}><ContentEditable html={line1} onChange={(v:any) => handleTextChange(setLine1, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
-              <DraggableBlock posKey="cert-pos-line2" setSnapGuide={setSnapGuide}><ContentEditable html={line2} onChange={(v:any) => handleTextChange(setLine2, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
-              <DraggableBlock posKey="cert-pos-line3" setSnapGuide={setSnapGuide}><ContentEditable html={line3} onChange={(v:any) => handleTextChange(setLine3, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
-              <DraggableBlock posKey="cert-pos-line4" setSnapGuide={setSnapGuide}><ContentEditable html={line4} onChange={(v:any) => handleTextChange(setLine4, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" /></DraggableBlock>
-              <DraggableBlock posKey="cert-pos-line5" setSnapGuide={setSnapGuide}><ContentEditable html={line5} onChange={(v:any) => handleTextChange(setLine5, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full font-semibold" /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line1" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line1} onChange={(v:any) => handleTextChange(setLine1, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" disabled={isLocked} /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line2" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line2} onChange={(v:any) => handleTextChange(setLine2, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" disabled={isLocked} /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line3" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line3} onChange={(v:any) => handleTextChange(setLine3, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" disabled={isLocked} /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line4" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line4} onChange={(v:any) => handleTextChange(setLine4, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full" disabled={isLocked} /></DraggableBlock>
+              <DraggableBlock posKey="cert-pos-line5" setSnapGuide={setSnapGuide} isLocked={isLocked}><ContentEditable html={line5} onChange={(v:any) => handleTextChange(setLine5, v)} onFocus={() => setActiveEditor('body')} onBlur={() => setActiveEditor(null)} className="w-full font-semibold" disabled={isLocked} /></DraggableBlock>
             </div>
 
             {/* Grades Table */}
-            <DraggableBlock posKey="cert-pos-grades" setSnapGuide={setSnapGuide}>
+            <DraggableBlock posKey="cert-pos-grades" setSnapGuide={setSnapGuide} isLocked={isLocked}>
               <div className="w-full max-w-[700px] mt-2 flex flex-col text-[16px] text-[#4b5563] bg-[#ffffff]/50 p-2 rounded">
                 <div className="border-y-[1.5px] border-[#c0b171] py-[4px]">
                   {grades.map((g, i) => (
                     <div 
                       key={i} 
                       className="flex justify-between items-end mb-2 w-full max-w-[600px] group/row transition-all"
-                      draggable
-                      onDragStart={(e) => handleDragStart(e, i)}
+                      draggable={!isLocked}
+                      onDragStart={(e) => !isLocked && handleDragStart(e, i)}
                       onDragEnd={handleDragEnd}
                       onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, i)}
+                      onDrop={(e) => !isLocked && handleDrop(e, i)}
                     >
-                      <div className="opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-[#d1d5db] hover:text-[#3b82f6] mr-2 transition-opacity p-1 no-print">
+                      <div className={`opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-[#d1d5db] hover:text-[#3b82f6] mr-2 transition-opacity p-1 no-print ${isLocked ? 'hidden' : ''}`}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
                       </div>
                       <ContentEditable 
@@ -1044,6 +1076,7 @@ export default function App() {
                         onFocus={() => setActiveEditor('grades')}
                         onBlur={() => setActiveEditor(null)}
                         className="font-serif font-bold text-[14px] text-[#1a2f57] w-[140px] text-left" 
+                        disabled={isLocked}
                       />
                       <div className="flex-1 border-b-[2px] border-dotted border-[#9ca3af] mx-[4px] mb-[6px] opacity-70"></div>
                       <ContentEditable 
@@ -1052,6 +1085,7 @@ export default function App() {
                         onFocus={() => setActiveEditor('grades')}
                         onBlur={() => setActiveEditor(null)}
                         className="w-[60px] whitespace-nowrap text-left text-[#374151] font-semibold mr-3" 
+                        disabled={isLocked}
                       />
                       <ContentEditable 
                         html={g.spell} 
@@ -1059,9 +1093,24 @@ export default function App() {
                         onFocus={() => setActiveEditor('grades')}
                         onBlur={() => setActiveEditor(null)}
                         className="w-[200px] whitespace-nowrap text-left text-[#4b5563]" 
+                        disabled={isLocked}
                       />
+
+                      {!isLocked && (
+                        <button onClick={() => removeGrade(i)} className="opacity-0 group-hover/row:opacity-100 text-red-300 hover:text-red-500 ml-2 transition-opacity no-print">
+                           <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ))}
+                  {!isLocked && (
+                    <button 
+                      onClick={addGrade}
+                      className="mt-2 text-xs text-blue-500 hover:text-blue-700 font-bold flex items-center gap-1 self-start transition-all no-print"
+                    >
+                      + Adicionar Nota
+                    </button>
+                  )}
                 </div>
               </div>
             </DraggableBlock>
@@ -1069,25 +1118,26 @@ export default function App() {
             {/* Footer / Signatures */}
             <div className="w-full max-w-[800px] flex justify-between px-10 items-start mt-8 relative z-20">
               {/* Left Signature */}
-              <DraggableBlock posKey="cert-pos-sig1" setSnapGuide={setSnapGuide}>
+              <DraggableBlock posKey="cert-pos-sig1" setSnapGuide={setSnapGuide} isLocked={isLocked}>
                 <div className="flex flex-col items-center w-64 pt-6 relative">
                   <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
                     <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
                     <div className="flex flex-col items-center mt-1">
-                      <ContentEditable html={sig1Role} onChange={(v:any) => handleTextChange(setSig1Role, v)} className="text-[14px] font-sans font-semibold text-[#374151] pt-0.5" />
+                      <ContentEditable html={sig1Name} onChange={(v:any) => handleTextChange(setSig1Name, v)} className="text-[14px] font-sans font-bold text-[#374151] pt-0.5" disabled={isLocked} />
+                      <ContentEditable html={sig1Role} onChange={(v:any) => handleTextChange(setSig1Role, v)} className="text-[14px] font-sans font-semibold text-[#374151] pt-0.5" disabled={isLocked} />
                     </div>
                   </div>
                 </div>
               </DraggableBlock>
 
               {/* Right Signature */}
-              <DraggableBlock posKey="cert-pos-sig2" setSnapGuide={setSnapGuide}>
+              <DraggableBlock posKey="cert-pos-sig2" setSnapGuide={setSnapGuide} isLocked={isLocked}>
                 <div className="flex flex-col items-center w-64 text-center relative pt-6">
                   <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
                     <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
                     <div className="flex flex-col items-center mt-1">
-                      <ContentEditable html={sig2Name} onChange={(v:any) => handleTextChange(setSig2Name, v)} className="text-[14px] font-sans font-bold text-[#374151] pt-0.5" />
-                      <ContentEditable html={sig2Role} onChange={(v:any) => handleTextChange(setSig2Role, v)} className="text-[14px] font-sans font-semibold text-[#374151] pt-0.5" />
+                      <ContentEditable html={sig2Name} onChange={(v:any) => handleTextChange(setSig2Name, v)} className="text-[14px] font-sans font-bold text-[#374151] pt-0.5" disabled={isLocked} />
+                      <ContentEditable html={sig2Role} onChange={(v:any) => handleTextChange(setSig2Role, v)} className="text-[14px] font-sans font-semibold text-[#374151] pt-0.5" disabled={isLocked} />
                     </div>
                   </div>
                 </div>
