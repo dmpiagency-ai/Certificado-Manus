@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v5';
+    const CACHE_VERSION = 'v6';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -331,7 +331,7 @@ export default function App() {
   const [logoText2, setLogoText2] = useLocalStorage('cert-logoText2', 'DE LÍNGUAS');
   const [title, setTitle] = useLocalStorage('cert-title', 'CERTIFICATE');
 
-  const [line1, setLine1] = useLocalStorage('cert-line1', 'Efigenio Cardiga José Vuma, headmaster of Language Community School Certifies that <strong style="color: #374151;">Maria Das Dores Marcelino Mussa</strong>');
+  const [line1, setLine1] = useLocalStorage('cert-line1', 'Albino Rafael Armando, headmaster of Language Community School Certifies that <strong style="color: #374151;">Maria Das Dores Marcelino Mussa</strong>');
   const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on 9<sup>th</sup> March 2006 with BI Nº 0701062860610 Issued on 18 / 08 / 2022 In Cidade Da Beira .');
   const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Beira &nbsp; Parents: Marcelino Mussa and Estrela Custavo Vilanculo');
   const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in 2026 (two thousand and twenty-six )');
@@ -344,7 +344,9 @@ export default function App() {
   ]);
 
   const [sig1Name, setSig1Name] = useLocalStorage('cert-sig1Name', '');
-  const [sig1Role, setSig1Role] = useLocalStorage('cert-sig1Role', '');
+  const [sig1Role, setSig1Role] = useLocalStorage('cert-sig1Role', 'Academic Department');
+  const [sig2Name, setSig2Name] = useLocalStorage('cert-sig2Name', '<strong>Albino Rafael Armando</strong>');
+  const [sig2Role, setSig2Role] = useLocalStorage('cert-sig2Role', 'The Headmaster');
 
   // Derived credits: only guests consume credits. Authenticated users (admin/developer) export freely.
   const isAdmin = !!user;
@@ -1058,7 +1060,6 @@ export default function App() {
               {/* Left Signature */}
               <DraggableBlock posKey="cert-pos-sig1" setSnapGuide={setSnapGuide}>
                 <div className="flex flex-col items-center w-64 pt-6 relative">
-                  <ContentEditable html={sig1Name} onChange={(v:any) => handleTextChange(setSig1Name, v)} className="font-signature text-[42px] text-[#1a2f57] leading-[0.5] w-full text-center relative z-10" />
                   <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
                     <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
                     <div className="flex flex-col items-center mt-1">
@@ -1068,13 +1069,15 @@ export default function App() {
                 </div>
               </DraggableBlock>
 
-              {/* Right Signature (Blank area for stamp and real ink signature) */}
+              {/* Right Signature */}
               <DraggableBlock posKey="cert-pos-sig2" setSnapGuide={setSnapGuide}>
                 <div className="flex flex-col items-center w-64 text-center relative pt-6 mt-10">
                   <div className="z-10 px-2 pt-2 pb-0 rounded w-full">
                     <div className="w-full border-b-[1.5px] border-[#1b365d] mb-1"></div>
-                    {/* Text completely removed so physical stamp can be used here without overlapping digital text */}
-                    <div className="h-[48px]"></div>
+                    <div className="flex flex-col items-center mt-1">
+                      <ContentEditable html={sig2Name} onChange={(v:any) => handleTextChange(setSig2Name, v)} className="text-[14px] font-sans font-bold text-[#374151] pt-0.5" />
+                      <ContentEditable html={sig2Role} onChange={(v:any) => handleTextChange(setSig2Role, v)} className="text-[14px] font-sans font-semibold text-[#374151] pt-0.5" />
+                    </div>
                   </div>
                 </div>
               </DraggableBlock>
