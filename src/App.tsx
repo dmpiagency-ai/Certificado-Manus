@@ -311,7 +311,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v21';
+    const CACHE_VERSION = 'v22';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -989,7 +989,7 @@ export default function App() {
                 <div className="w-[2.5px] h-10 bg-[#1a1a1a] opacity-95 mx-[2px]"></div>
 
                 {/* Logo Texts - Optimized Spacing */}
-                <div className="flex flex-col font-sans uppercase space-y-0.5 items-start text-left ml-[8px]">
+                <div className="flex flex-col font-sans uppercase -space-y-1.2 items-start text-left ml-[3px]">
                   <ContentEditable html={logoText1} onChange={(v:any) => handleTextChange(setLogoText1, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-extrabold text-[#1a1a1a] tracking-tighter" />
                   <ContentEditable html={logoText2} onChange={(v:any) => handleTextChange(setLogoText2, v)} onFocus={() => setActiveEditor('header')} onBlur={() => setActiveEditor(null)} className="text-[22px] font-extrabold text-[#1a1a1a] tracking-[-0.02em]" />
                 </div>
