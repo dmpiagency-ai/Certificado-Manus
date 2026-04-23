@@ -316,7 +316,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v36';
+    const CACHE_VERSION = 'v37';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -1064,20 +1064,20 @@ export default function App() {
 
             {/* Grades Table */}
             <DraggableBlock posKey="cert-pos-grades" setSnapGuide={setSnapGuide} isLocked={isLocked}>
-              <div className="w-full max-w-[700px] mt-4 flex flex-col text-[16px] text-[#4b5563] bg-[#ffffff]/50 p-4 rounded-xl border border-gray-100 shadow-sm">
-                <div className="border-y-[1.5px] border-[#c0b171] py-6 flex flex-col items-center">
+              <div className="w-full max-w-[800px] mt-4 flex flex-col text-[16px] text-[#4b5563] bg-[#ffffff]/50 p-2 rounded">
+                <div className="border-y-[1.5px] border-[#c0b171] py-4 flex flex-col items-center">
                   {grades.map((g, i) => (
                     <div 
                       key={i} 
-                      className="flex flex-col items-center mb-8 last:mb-0 w-full group/row transition-all relative"
+                      className="flex flex-row items-center justify-center gap-6 mb-2 w-full group/row transition-all relative"
                       draggable={!isLocked}
                       onDragStart={(e) => !isLocked && handleDragStart(e, i)}
                       onDragEnd={handleDragEnd}
                       onDragOver={handleDragOver}
                       onDrop={(e) => !isLocked && handleDrop(e, i)}
                     >
-                      <div className={`absolute -left-12 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-[#d1d5db] hover:text-[#3b82f6] transition-opacity p-2 no-print ${isLocked ? 'hidden' : ''}`}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+                      <div className={`absolute -left-8 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 cursor-grab active:cursor-grabbing text-[#d1d5db] hover:text-[#3b82f6] transition-opacity p-1 no-print ${isLocked ? 'hidden' : ''}`}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/></svg>
                       </div>
 
                       <ContentEditable 
@@ -1085,33 +1085,33 @@ export default function App() {
                         onChange={(v: string) => updateGrade(i, 'subject', v)} 
                         onFocus={() => setActiveEditor('grades')}
                         onBlur={() => setActiveEditor(null)}
-                        className="text-[20px] font-bold text-[#1b365d] tracking-widest mb-1 uppercase" 
+                        className="font-bold text-[15px] text-[#1a2f57] w-[140px] text-right uppercase tracking-wider" 
                         disabled={isLocked}
                       />
-                      
-                      <div className="flex items-center gap-4 text-[17px] text-[#4b5563]">
+
+                      <div className="flex items-center gap-3">
                         <ContentEditable 
                           html={g.percent} 
                           onChange={(v: string) => updateGrade(i, 'percent', v)} 
                           onFocus={() => setActiveEditor('grades')}
                           onBlur={() => setActiveEditor(null)}
-                          className="font-black text-[#1b365d] text-lg" 
+                          className="w-[50px] whitespace-nowrap text-center text-[#374151] font-black" 
                           disabled={isLocked}
                         />
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#c0b171]"></span>
+                        <span className="w-1 h-1 rounded-full bg-[#c0b171]/40"></span>
                         <ContentEditable 
                           html={g.spell} 
                           onChange={(v: string) => updateGrade(i, 'spell', v)} 
                           onFocus={() => setActiveEditor('grades')}
                           onBlur={() => setActiveEditor(null)}
-                          className="italic font-medium text-gray-400" 
+                          className="w-[200px] whitespace-nowrap text-left text-[#4b5563] italic font-medium" 
                           disabled={isLocked}
                         />
                       </div>
 
                       {!isLocked && (
-                        <button onClick={() => removeGrade(i)} className="absolute -right-12 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 text-red-300 hover:text-red-500 transition-opacity p-2 no-print">
-                           <X className="w-5 h-5" />
+                        <button onClick={() => removeGrade(i)} className="absolute -right-8 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 text-red-300 hover:text-red-500 transition-opacity no-print">
+                           <X className="w-4 h-4" />
                         </button>
                       )}
                     </div>
@@ -1120,9 +1120,9 @@ export default function App() {
                   {!isLocked && (
                     <button 
                       onClick={addGrade}
-                      className="mt-2 text-xs text-blue-500 hover:text-blue-700 font-bold flex items-center gap-1 self-start transition-all no-print"
+                      className="mt-4 px-4 py-1.5 bg-blue-50/50 text-blue-600 hover:bg-blue-100/50 rounded-lg text-xs font-bold flex items-center gap-2 transition-all no-print border border-blue-100/50"
                     >
-                      + Adicionar Nota
+                      <span className="text-sm">+</span> Adicionar Disciplina
                     </button>
                   )}
                 </div>
