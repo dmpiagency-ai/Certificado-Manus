@@ -313,6 +313,9 @@ export default function App() {
   const [authError, setAuthError] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [showQuickFill, setShowQuickFill] = useState(false);
+  const [quickInputText, setQuickInputText] = useState('');
+  const [quickParseFeedback, setQuickParseFeedback] = useState('');
   // certScale is now derived from baseScale * zoomLevel
   const [activeEditor, setActiveEditor] = useState<string | null>(null);
   const [draggedGradeIdx, setDraggedGradeIdx] = useState<number | null>(null);
@@ -323,7 +326,7 @@ export default function App() {
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v44';
+    const CACHE_VERSION = 'v45';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -343,10 +346,10 @@ export default function App() {
   const [logoText2, setLogoText2] = useLocalStorage('cert-logoText2', 'DE LÍNGUAS');
   const [title, setTitle] = useLocalStorage('cert-title', 'CERTIFICATE');
 
-  const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Albino Rafael Armando</strong>, headmaster of Languages Community School Certifies that <strong style="white-space: nowrap; color: #374151;">Maria Das Dores Marcelino Mussa</strong>');
-  const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on the 9<sup>th</sup> March 2006 with BI Nº 0701062860610 Issued on the 18<sup>th</sup> August 2022 In Beira City.');
-  const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Beira &nbsp; Parents: Marcelino Mussa and Estrela Custavo Vilanculo');
-  const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in the year 2026 (Two Thousand and Twenty-Six)');
+  const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Albino Rafael Armando</strong>, headmaster of Languages Community School Certifies that <strong style="white-space: nowrap; color: #374151;">JOSÉ TOMAS NOGE</strong>');
+  const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on 19/09/2007 with BI Nº 110106910068M Issued on 23/06/2022 in Cidade de Maputo.');
+  const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Maputo &nbsp; Parents: TOMAS JOSÉ NOGE and GILDA FRANCISCA MIGUEL MONJANE');
+  const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, the student was submitted to the final exams in the year 2026.');
   const [line5, setLine5] = useLocalStorage('cert-line5', 'Having got the following classification');
   
   const [grades, setGrades] = useLocalStorage('cert-grades', [
@@ -539,6 +542,82 @@ export default function App() {
     (newGrades[index] as any)[field] = value;
     setGrades(newGrades);
     setTimeout(() => setIsSaved(true), 500);
+  };
+
+  const readField = (text: string, aliases: string[]) => {
+    for (const alias of aliases) {
+      const pattern = new RegExp(`(?:^|\\n)\\s*${alias}\\s*[:=-]\\s*(.+)`, 'i');
+      const match = text.match(pattern);
+      if (match?.[1]) return match[1].trim();
+    }
+    return '';
+  };
+
+  const applyQuickStudentData = () => {
+    const raw = quickInputText.trim();
+    if (!raw) {
+      alert('Cole os dados do aluno para aplicar.');
+      return;
+    }
+
+    const studentName = readField(raw, ['nome do aluno', 'aluno', 'nome']);
+    const birthDate = readField(raw, ['data de nascimento', 'nascimento', 'dn']);
+    const biNumber = readField(raw, ['bi', 'bi n[oº]?', 'numero do bi']);
+    const biIssueDate = readField(raw, ['data emiss[aã]o bi', 'emissao bi', 'bi emitido']);
+    const birthPlace = readField(raw, ['naturalidade', 'local de nascimento']);
+    const fatherName = readField(raw, ['nome do pai', 'pai']);
+    const motherName = readField(raw, ['nome da m[aã]e', 'mae', 'm[aã]e']);
+    const courseLevel = readField(raw, ['n[ií]vel do curso', 'nivel', 'classe']);
+    const courseName = readField(raw, ['curso', 'disciplina']);
+    const examYear = readField(raw, ['ano de exame', 'ano de exames', 'ano']);
+    const headmasterName = readField(raw, ['diretor', 'director', 'headmaster']);
+    const schoolName = readField(raw, ['escola', 'institui[cç][aã]o', 'school']);
+
+    if (!studentName) {
+      alert('Nao consegui identificar o nome do aluno. Use: Nome do aluno: ...');
+      return;
+    }
+
+    const finalHeadmaster = headmasterName || 'Albino Rafael Armando';
+    const finalSchool = schoolName || 'Languages Community School';
+    const finalCourseLevel = courseLevel || '5th';
+    const finalCourseName = courseName || 'English';
+    const finalExamYear = examYear || String(new Date().getFullYear());
+
+    setIsSaved(false);
+    setLine1(
+      `<strong>${finalHeadmaster}</strong>, headmaster of ${finalSchool} Certifies that <strong style="white-space: nowrap; color: #374151;">${studentName}</strong>`
+    );
+    setLine2(
+      `Born on ${birthDate || 'N/A'} with BI Nº ${biNumber || 'N/A'} Issued on ${biIssueDate || 'N/A'}.`
+    );
+    setLine3(
+      `Place of birth: ${birthPlace || 'N/A'} &nbsp; Parents: ${fatherName || 'N/A'} and ${motherName || 'N/A'}`
+    );
+    setLine4(
+      `Concluded the ${finalCourseLevel} level of ${finalCourseName} Course in this institution, the student was submitted to the final exams in the year ${finalExamYear}.`
+    );
+
+    const foundFields = [
+      studentName && 'nome',
+      birthDate && 'nascimento',
+      biNumber && 'bi',
+      biIssueDate && 'emissao bi',
+      birthPlace && 'naturalidade',
+      fatherName && 'pai',
+      motherName && 'mae',
+      courseLevel && 'nivel',
+      courseName && 'curso',
+      examYear && 'ano',
+      headmasterName && 'diretor',
+      schoolName && 'escola'
+    ].filter(Boolean).length;
+
+    setQuickParseFeedback(`Dados aplicados com sucesso. Campos reconhecidos: ${foundFields}/12.`);
+    setTimeout(() => {
+      setIsSaved(true);
+      saveHistorySnapshot();
+    }, 300);
   };
 
   const addGrade = () => {
@@ -909,6 +988,62 @@ export default function App() {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Quick Student Fill Panel */}
+        <div className="w-full max-w-[1123px] mx-auto mb-5 no-print">
+          {!showQuickFill ? (
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowQuickFill(true)}
+                className="bg-white/95 border border-gray-200 text-[#112344] font-bold text-[11px] px-3 py-2 rounded-xl shadow-sm hover:bg-white transition-colors flex items-center gap-2"
+              >
+                <Info className="w-4 h-4 text-blue-600" />
+                Funcionalidade: Preenchimento Rapido
+              </button>
+            </div>
+          ) : (
+            <div className="bg-white/95 border border-gray-200 rounded-2xl shadow-lg p-3">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-blue-600" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-[#112344]">Preenchimento Rapido do Aluno</span>
+                </div>
+                <button
+                  onClick={() => setShowQuickFill(false)}
+                  className="text-[10px] font-bold text-gray-500 hover:text-[#112344] px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  Fechar
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-[12px] text-gray-600 leading-relaxed">
+                  Cole os dados em texto livre e o sistema atualiza o certificado automaticamente mantendo o formato do modelo.
+                  <span className="font-semibold text-gray-800"> Exemplo:</span> Nome do aluno: ..., BI: ..., Nome do pai: ...
+                </p>
+                <textarea
+                  value={quickInputText}
+                  onChange={(e) => setQuickInputText(e.target.value)}
+                  placeholder={`Nome do aluno: Maria Das Dores\nData de nascimento: 09/03/2006\nBI: 0701062860610\nData emissao BI: 18/08/2022\nNaturalidade: Beira\nNome do pai: Marcelino Mussa\nNome da mae: Estrela Custavo Vilanculo\nNivel do curso: 5th\nCurso: English\nAno de exame: 2026\nDiretor: Albino Rafael Armando\nEscola: Languages Community School`}
+                  className="w-full min-h-[170px] px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono leading-relaxed"
+                />
+                {quickParseFeedback && (
+                  <div className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+                    {quickParseFeedback}
+                  </div>
+                )}
+                <div className="flex justify-end mt-1">
+                  <button
+                    onClick={applyQuickStudentData}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider px-4 py-2 rounded-xl transition-all active:scale-95"
+                  >
+                    Analisar e Aplicar no Modelo
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Dynamic Context Guide Wrapper (Absolute to prevent layout shift) */}
