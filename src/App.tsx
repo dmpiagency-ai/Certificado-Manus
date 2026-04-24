@@ -541,6 +541,22 @@ export default function App() {
     setTimeout(() => setIsSaved(true), 500);
   };
 
+  const addGrade = () => {
+    setIsSaved(false);
+    setGrades([
+      ...grades,
+      { subject: 'New Subject', percent: '0 %', spell: 'Zero Percent' }
+    ]);
+    setTimeout(() => setIsSaved(true), 500);
+  };
+
+  const removeGrade = (index: number) => {
+    if (grades.length <= 1) return;
+    setIsSaved(false);
+    setGrades(grades.filter((_, i) => i !== index));
+    setTimeout(() => setIsSaved(true), 500);
+  };
+
   const handleTextChange = (updater: (value: string) => void, value: string) => {
     setIsSaved(false);
     updater(value);
