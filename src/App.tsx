@@ -328,14 +328,14 @@ export default function App() {
   const loadCurrentStudentData = () => {
     const text = `REPÚBLICA DE MOÇAMBIQUE
 BILHETE DE IDENTIDADE
-N°: 081404930288S
-Nome / Name: ISSÁ DADE JÚNIOR
-Data de Nascimento / Date of Birth: 25/03/2006
-Naturalidade / Place of Birth: MOCUBA
-Data de Emissão / Issuance Date: 14/11/2024
-Nome do Pai / Father Name: ISSÁ DADE
-Nome da Mãe / Mother Name: LEONILDE DA COSTA NOBRE DO ROSÁRIO
-Sexo / Sex: M
+N°: 110106868410P
+Nome / Name: ANICETA ISAURA MARTIS
+Data de Nascimento / Date of Birth: 15/02/2001
+Naturalidade / Place of Birth: MARRACUENE
+Data de Emissão / Issuance Date: 15/03/2023
+Nome do Pai / Father Name: MARTIS GASPAR
+Nome da Mãe / Mother Name: ALICE ANTÓNIO MASSIMBE
+Sexo / Sex: F
 Nível do curso: 5th
 Curso: English
 Data: 2026`;
@@ -346,7 +346,7 @@ Data: 2026`;
   // Versioned cache reset — runs synchronously on first render, before useLocalStorage reads.
   // Bump CACHE_VERSION whenever default content changes to push new defaults to all users.
   useState(() => {
-    const CACHE_VERSION = 'v99';
+    const CACHE_VERSION = 'v108';
     if (typeof window !== 'undefined' && window.localStorage.getItem('cert-cache-version') !== CACHE_VERSION) {
       // Clear all cert keys except guest credits to do a full factory reset of the layout
       const keysToRemove = [];
@@ -367,10 +367,10 @@ Data: 2026`;
   const [logoText2, setLogoText2] = useLocalStorage('cert-logoText2', 'DE LÍNGUAS');
   const [title, setTitle] = useLocalStorage('cert-title', 'CERTIFICATE');
 
-   const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Efigénio Cardiga José Vuma</strong>, headmaster of Language Community School certifies that <strong style="white-space: nowrap; color: #374151;">ISSÁ DADE JÚNIOR</strong>');
-    const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on the 25<sup>th</sup> of March 2006 with ID Nr 081404930288S, issued on the 14<sup>th</sup> of November 2024 in Maputo City.');
-   const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Mocuba, Parents: ISSÁ DADE and LEONILDE DA COSTA NOBRE DO ROSÁRIO');
-   const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, he was submitted to the final exams in 2026<br />(two thousand and twenty-six)');
+   const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Efigénio Cardiga José Vuma</strong>, headmaster of Language Community School certifies that <strong style="white-space: nowrap; color: #374151;">ANICETA ISAURA MARTIS</strong>');
+    const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on the 15<sup>th</sup> of February 2001 with ID Nr 110106868410P, issued on the 15<sup>th</sup> of March 2023 in Maputo City.');
+   const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: Marracuene, Parents: MARTIS GASPAR and ALICE ANTÓNIO MASSIMBE');
+   const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in 2026<br />(two thousand and twenty-six)');
    const [line5, setLine5] = useLocalStorage('cert-line5', 'Having got the following classification');
 
   useEffect(() => {
@@ -382,6 +382,7 @@ Data: 2026`;
   const [grades, setGrades] = useState([
     { subject: 'Writing', percent: '68 %', spell: 'Sixty eight percent' },
     { subject: 'Speaking', percent: '73 %', spell: 'Seventy three percent' },
+    { subject: 'Listening', percent: '83 %', spell: 'Eighty three percent' },
     { subject: 'Average', percent: '71 %', spell: 'Seventy one percent' }
   ]);
 

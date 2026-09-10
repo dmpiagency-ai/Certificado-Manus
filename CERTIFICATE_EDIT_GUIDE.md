@@ -1,106 +1,193 @@
 # Manual de Instruções: Atualização de Alunos no Certificado
 
-Use este guia em qualquer IA ou IDE para atualizar os dados de novos alunos no projeto de certificados sem cometer erros.
+> **PROTOCOLO DE TOLERÂNCIA ZERO A ERROS**: Este documento é a fonte de verdade absoluta para o preenchimento, validação e atualização de dados dos certificados da **Language Community School**. Nenhuma alteração nas lógicas internas do código (React, SVG, CSS, engine de renderização ou exportação) deve ser feita. Apenas a injeção estrita e padronizada dos dados do aluno.
 
 ---
 
-## 🚀 Fluxo de Trabalho (Passo a Passo)
+## 🛡️ Regras Fundamentais e Inegociáveis (Design System & Dados)
 
-### 1. Extração de Dados dos Prints (BI)
-Identifique as seguintes informações nos documentos do aluno:
-* **Nome**: Nome Completo em Maiúsculas (ex: `MELIVO ISSA DADE`).
-* **Nascimento**: Data no formato `DD/MM/AAAA` (ex: `25/03/2006`).
-* **Número do BI**: Número completo incluindo a letra no final (ex: `081404930287B`).
-* **Emissão**: Data no formato `DD/MM/AAAA` (ex: `15/11/2024`).
-* **Local de Emissão**: Sempre traduza "Cidade de..." para o Inglês (ex: `CIDADE DE MAPUTO` ➡️ `Maputo City`, `CIDADE DE INHAMBANE` ➡️ `Inhambane City`).
-* **Naturalidade (Birthplace)**: Nome da cidade/distrito capitalizada (ex: `MORRUMBALA` ➡️ `Morrumbala`).
-* **Filiação**: Nome do pai e da mãe (ex: `ISSA DADE` e `LEONILDE DA COSTA NOBRE DO ROSÁRIO`).
-* **Sexo (Pronome)**: `M` ➡️ usar pronomes masculinos (`he`), `F` ➡️ usar pronomes femininos (`she`).
-* **Curso / Nível**: Geralmente `5th level of English Course` (ou outro conforme instruído).
-* **Notas (Grades)**: Extraia as porcentagens e a grafia por extenso em inglês:
-  * **Writing**: ex: `68 %` ➡️ `Sixty eight percent`
-  * **Speaking**: ex: `73 %` ➡️ `Seventy three percent`
-  * **Average**: ex: `71 %` ➡️ `Seventy one percent`
+### 1. Nome do Aluno
+* **Formato**: CAIXA ALTA rigorosa, respeitando todos os acentos originais do BI (ex: `ISSÁ DADE JÚNIOR`, `PLÍNIA DA CONCEIÇÃO JOÃO SIQUICE`, `WAGNER JULINO NHATSAVE`).
+* **Tag Obrigatória de Estilo**: O nome na `line1` deve SEMPRE estar encapsulado por:
+  ```html
+  <strong style="white-space: nowrap; color: #374151;">NOME_DO_ALUNO</strong>
+  ```
+  *(O `white-space: nowrap;` impede que o nome do aluno quebre de forma deselegante).*
 
 ---
 
-### 2. Modificação no Arquivo `src/App.tsx`
+### 2. Número do Bilhete de Identidade (BI)
+* **Formato**: Exatamente 13 caracteres (12 dígitos seguidos de 1 letra maiúscula).
+* **Exemplos**: `110104531919M`, `081404930288S`, `081408872761J`.
+* Nunca insira espaços ou traços no número do BI.
 
-Abra o arquivo [src/App.tsx](src/App.tsx) e realize três edições principais:
+---
 
-#### A. Atualizar a Função `loadCurrentStudentData`
-Substitua o template da string `text` com os dados literais do aluno novo:
+### 3. Datas e Sufixos Ordinais (`<sup>...</sup>`)
+Todas as datas do corpo do certificado são escritas no padrão formal em inglês:
+`Born on the [DIA]<sup>[SUFIXO]</sup> of [MÊS_EM_INGLÊS] [ANO]` e `issued on the [DIA]<sup>[SUFIXO]</sup> of [MÊS_EM_INGLÊS] [ANO]`.
+
+#### Tabela Canônica de Sufixos Ordinais:
+| Dias do Mês | Sufixo HTML | Exemplos Práticos |
+| :--- | :--- | :--- |
+| Termina em **1** (exceto 11) | `<sup>st</sup>` | `1<sup>st</sup>`, `21<sup>st</sup>`, `31<sup>st</sup>` |
+| Termina em **2** (exceto 12) | `<sup>nd</sup>` | `2<sup>nd</sup>`, `22<sup>nd</sup>` |
+| Termina em **3** (exceto 13) | `<sup>rd</sup>` | `3<sup>rd</sup>`, `23<sup>rd</sup>` |
+| 11, 12, 13 e todos os demais | `<sup>th</sup>` | `4<sup>th</sup>`, `6<sup>th</sup>`, `11<sup>th</sup>`, `12<sup>th</sup>`, `13<sup>th</sup>`, `15<sup>th</sup>`, `30<sup>th</sup>` |
+
+#### Tabela de Meses em Inglês:
+* `01` ➡️ `January`
+* `02` ➡️ `February`
+* `03` ➡️ `March`
+* `04` ➡️ `April`
+* `05` ➡️ `May`
+* `06` ➡️ `June`
+* `07` ➡️ `July`
+* `08` ➡️ `August`
+* `09` ➡️ `September`
+* `10` ➡️ `October`
+* `11` ➡️ `November`
+* `12` ➡️ `December`
+
+---
+
+### 4. Local de Emissão (Regra da Cidade com "City")
+* **REGRA OBRIGATÓRIA**: Cidades moçambicanas de emissão devem SEMPRE vir acompanhadas do sufixo **`City`** em inglês.
+  * `CIDADE DE MAPUTO` ou `MAPUTO` ➡️ **`Maputo City`** *(NUNCA deixar apenas "Maputo")*
+  * `CIDADE DE INHAMBANE` ou `INHAMBANE` ➡️ **`Inhambane City`**
+  * `CIDADE DA MATOLA` ou `MATOLA` ➡️ **`Matola City`**
+  * `CIDADE DA BEIRA` ou `BEIRA` ➡️ **`Beira City`**
+* **Texto final na `line2`**: `... in Maputo City.`
+
+---
+
+### 5. Naturalidade (Place of Birth)
+* **Formato**: Sempre em *Title Case* (primeira letra maiúscula, restantes minúsculas).
+* **Exemplos**:
+  * `MOCUBA` ➡️ `Mocuba`
+  * `ZAVALA` ➡️ `Zavala`
+  * `MORRUMBALA` ➡️ `Morrumbala`
+  * `MAPUTO` ➡️ `Maputo`
+
+---
+
+### 6. Filiação (Parents)
+* **Formato**: Nome do pai em CAIXA ALTA + ` and ` + Nome da mãe em CAIXA ALTA.
+* **Exemplo Padrão**: `Parents: ROGÉRIO EDSON NHATSAVE and AMÉLIA TATIANA NETO`
+* Preservar acentos nos nomes dos pais se constarem no BI.
+* **Nomes Longos (Prevenção de Quebra de Linha)**: Quando os nomes forem extensos e causarem quebra com apenas o último sobrenome caindo para a linha seguinte (ex: `... ALEXANDRINA` / `CUMBE`), encapsular na tag com ajuste de tamanho e `nowrap`:
+  ```html
+  Parents: <span style="font-size: 14.5px; white-space: nowrap;">[NOME_DO_PAI] and [NOME_DA_MÃE]</span>
+  ```
+  Isso mantém ambos os nomes completos alinhados e sem quebras desagradáveis.
+
+---
+
+### 7. Gênero e Concordância de Pronomes na Linha 4
+* Sexo **Masculino (M)**: `, he was submitted to the final exams in 2026<br />(two thousand and twenty-six)`
+* Sexo **Feminino (F)**: `, she was submitted to the final exams in 2026<br />(two thousand and twenty-six)`
+* A tag `<br />` antes de `(two thousand and twenty-six)` é usada em níveis padrão para o equilíbrio visual.
+
+---
+
+### 8. Nível do Curso e Regra para Textos Longos (Sem `<br />`)
+* **Nível 5 Padrão** (Texto curto - com `<br />`):
+  `Concluded the 5<sup>th</sup> level of English Course in this institution, [he/she] was submitted to the final exams in 2026<br />(two thousand and twenty-six)`
+* **Textos Longos / Nível CEFR** (NÃO usar `<br />` - manter contínuo):
+  Quando o texto do nível for longo (como a designação CEFR completa com data específica), **NÃO** inserir tags `<br />`. O texto deve fluir continuamente em linha para não estourar o layout vertical do certificado:
+  `Concluded the Intermediate Level-B1 to Upper-Intermediate of the CEFR- Common European Framework of Reference For Languages on the 23<sup>rd</sup> May 2026 (two thousand and twenty-six)`
+
+---
+
+### 9. Notas e Classificações (Grades)
+* Todas as classificações são divididas em 3 matérias: `Writing`, `Speaking` e `Average`.
+* O campo `percent` possui o valor e o símbolo com espaço: `XX %`.
+* O campo `spell` possui a grafia por extenso em inglês **capitalizada** (Title Case):
+  * `60 %` ➡️ `Sixty percent`
+  * `68 %` ➡️ `Sixty eight percent`
+  * `71 %` ➡️ `Seventy one percent`
+  * `73 %` ➡️ `Seventy three percent`
+  * `75 %` ➡️ `Seventy five percent`
+  * `79 %` ➡️ `Seventy nine percent`
+  * `80 %` ➡️ `Eighty percent`
+  * `83 %` ➡️ `Eighty three percent`
+  * `85 %` ➡️ `Eighty five percent`
+
+---
+
+## 🔄 Fluxo de Atualização em 4 Passos Obrigatórios
+
+Toda atualização de aluno deve sincronizar de forma atômica os seguintes pontos:
+
+### Passo 1: Atualizar `loadCurrentStudentData` em [src/App.tsx](src/App.tsx)
+Atualize a string `text` para que o botão "Carregar Aluno Atual" contenha os dados do aluno ativo:
 ```typescript
   const loadCurrentStudentData = () => {
     const text = `REPÚBLICA DE MOÇAMBIQUE
 BILHETE DE IDENTIDADE
-N°: [NÚMERO_DO_BI]
-Nome / Name: [NOME_COMPLETO]
-Data de Nascimento / Date of Birth: [DD/MM/AAAA]
-Naturalidade / Place of Birth: [NATURALIDADE]
-Data de Emissão / Issuance Date: [DD/MM/AAAA]
-Nome do Pai / Father Name: [NOME_DO_PAI]
-Nome da Mãe / Mother Name: [NOME_DA_MÃE]
-Sexo / Sex: [M/F]
-Nível do curso: [NÍVEL]
-Curso: [CURSO]
+N°: 110104531919M
+Nome / Name: WAGNER JULINO NHATSAVE
+Data de Nascimento / Date of Birth: 06/07/2007
+Naturalidade / Place of Birth: MAPUTO
+Data de Emissão / Issuance Date: 30/07/2024
+Nome do Pai / Father Name: ROGÉRIO EDSON NHATSAVE
+Nome da Mãe / Mother Name: AMÉLIA TATIANA NETO
+Sexo / Sex: M
+Nível do curso: 5th
+Curso: English
 Data: 2026`;
     setQuickInputText(text);
     setQuickParseFeedback('Dados do aluno atual carregados. Clique em Analisar e Aplicar no Modelo.');
   };
 ```
 
-#### B. Incrementar a Versão do Cache (`CACHE_VERSION`)
-Procure pela constante `CACHE_VERSION` (geralmente próxima à linha 349) e **incremente em 1** (ex: se estiver `'v96'`, mude para `'v97'`). Isso força o navegador a invalidar o localStorage antigo e aplicar os novos dados padrão.
+### Passo 2: Incrementar `CACHE_VERSION` em [src/App.tsx](src/App.tsx)
+Localize a linha ~349 e **some 1** ao número da versão (ex: de `'v100'` para `'v101'`).
 ```typescript
   useState(() => {
-    const CACHE_VERSION = 'v97'; // Incremente aqui
-    ...
+    const CACHE_VERSION = 'v101'; // <-- Sempre incrementar
 ```
+> **Por que é crucial?** O aplicativo usa `localStorage` para manter alterações do usuário. Se o `CACHE_VERSION` não for incrementado, o navegador continuará mostrando os dados do aluno anterior em cache.
 
-#### C. Atualizar as Linhas de Texto do Certificado (`line1` a `line4`) e `grades`
-Substitua as variáveis de estado padrão observando as regras gramaticais e tags HTML:
-
+### Passo 3: Atualizar Linhas Padrão e Notas em [src/App.tsx](src/App.tsx)
+Atualize os estados `cert-line1` a `cert-line5` e o array de `grades`:
 ```typescript
-   const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Efigénio Cardiga José Vuma</strong>, headmaster of Language Community School certifies that <strong style="white-space: nowrap; color: #374151;">[NOME_COMPLETO]</strong>');
-    const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on the [DIA]<sup>[SUFIXO]</sup> of [MÊS_EM_INGLÊS] [ANO] with ID Nr [BI], issued on the [DIA]<sup>[SUFIXO]</sup> of [MÊS_EM_INGLÊS] [ANO] in [CIDADE_EM_INGLÊS] City.');
+   const [line1, setLine1] = useLocalStorage('cert-line1', '<strong>Efigénio Cardiga José Vuma</strong>, headmaster of Language Community School certifies that <strong style="white-space: nowrap; color: #374151;">[NOME_DO_ALUNO]</strong>');
+   const [line2, setLine2] = useLocalStorage('cert-line2', 'Born on the [DIA]<sup>[SUFIXO]</sup> of [MÊS] [ANO] with ID Nr [BI], issued on the [DIA]<sup>[SUFIXO]</sup> of [MÊS] [ANO] in [CIDADE] City.');
    const [line3, setLine3] = useLocalStorage('cert-line3', 'Place of birth: [Naturalidade], Parents: [PAI] and [MÃE]');
-   const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the [NÍVEL] level of English Course in this institution, [he/she] was submitted to the final exams in 2026<br />(two thousand and twenty-six)');
+   const [line4, setLine4] = useLocalStorage('cert-line4', 'Concluded the 5<sup>th</sup> level of English Course in this institution, [he/she] was submitted to the final exams in 2026<br />(two thousand and twenty-six)');
+   const [line5, setLine5] = useLocalStorage('cert-line5', 'Having got the following classification');
+
+   const [grades, setGrades] = useState([
+     { subject: 'Writing', percent: '[XX] %', spell: '[Xx percent]' },
+     { subject: 'Speaking', percent: '[YY] %', spell: '[Yy percent]' },
+     { subject: 'Average', percent: '[ZZ] %', spell: '[Zz percent]' }
+   ]);
 ```
 
-E a pauta de notas default:
-```typescript
-  const [grades, setGrades] = useState([
-    { subject: 'Writing', percent: '[NOTA] %', spell: '[Nota_Por_Extenso_Em_Inglês_Capitalizada]' },
-    { subject: 'Speaking', percent: '[NOTA] %', spell: '[Nota_Por_Extenso_Em_Inglês_Capitalizada]' },
-    { subject: 'Average', percent: '[NOTA] %', spell: '[Nota_Por_Extenso_Em_Inglês_Capitalizada]' }
-  ]);
-```
+### Passo 4: Criar/Atualizar o Arquivo de Histórico em `students/[NOME_DO_ALUNO].md`
+Crie um arquivo com a convenção `students/PRIMEIRO_SEGUNDO_ULTIMO.md` contendo:
+1. Cabeçalho com o nome do aluno.
+2. Bloco bruto do Quick Fill.
+3. As 5 linhas formatadas completas.
+4. As classificações numéricas e por extenso.
 
 ---
 
-## ⚠️ Regras Cruciais de Formatação
+## ✅ Checklist de Pré-Conclusão (Auditoria do Agente)
 
-1. **Sufixos Ordinais em Datas**: Use tags `<sup>` para sufixos:
-   * Termina em 1 (exceto 11): `<sup>st</sup>` (ex: `1<sup>st</sup>`, `21<sup>st</sup>`, `31<sup>st</sup>`)
-   * Termina em 2 (exceto 12): `<sup>nd</sup>` (ex: `2<sup>nd</sup>`, `22<sup>nd</sup>`)
-   * Termina em 3 (exceto 13): `<sup>rd</sup>` (ex: `3<sup>rd</sup>`, `23<sup>rd</sup>`)
-   * Restante: `<sup>th</sup>` (ex: `11<sup>th</sup>`, `15<sup>th</sup>`, `8<sup>th</sup>`)
-2. **Pronombre (Gênero)**: 
-   * Para Sexo **M**: Use `he was submitted` na `line4`.
-   * Para Sexo **F**: Use `she was submitted` na `line4`.
-3. **Cidade com "City"**: Traduza `Cidade de Maputo` para `Maputo City` e `Cidade de Inhambane` para `Inhambane City`.
-4. **Preservação de Tags HTML**: Mantenha as tags `<strong>`, `<strong style="...">` e `<br />` exatamente iguais nos textos padrão para manter a estilização do layout intacta.
-5. **Nível Especial ("Upper")**: Se for instruído a mudar o nível para "upper", use exatamente o seguinte texto de nível:
-   * **Nível por Extenso**: `Intermediate Level-B1 to Upper-Intermediate of the CEFR- Common European Framework of Reference For Languages`
-   * **Como aplicar na `line4`** (com o pronome correspondente):
-     `Concluded the Intermediate Level-B1 to Upper-Intermediate of the CEFR- Common European Framework of Reference For Languages in this institution, [he/she] was submitted to the final exams in 2026<br />(two thousand and twenty-six)`
-6. **Nível Especial ("5")**: Se for instruído a mudar o nível para "5" ou "nível 5", use a seguinte designação:
-   * **Nível**: `5th`
-   * **Como aplicar na `line4`** (com o pronome correspondente):
-     `Concluded the 5<sup>th</sup> level of English Course in this institution, [he/she] was submitted to the final exams in 2026<br />(two thousand and twenty-six)`
+Antes de entregar a atualização, o Agente Sênior DEVE validar cada item abaixo:
 
----
-
-### 3. Salvar Histórico do Aluno
-Sempre crie ou atualize o histórico do aluno na pasta `students/` no formato Markdown (ex: `students/NOME_DO_ALUNO.md`) contendo a versão bruta do Quick Fill para recuperação rápida futura.
+- [ ] **Nome**: O nome está em caixa alta, sem erros de digitação e com `<strong style="white-space: nowrap; color: #374151;">`?
+- [ ] **BI**: O BI possui 13 dígitos completos e a letra está correta?
+- [ ] **Datas**: Os dias têm os sufixos ordinais corretos (`1st`, `2nd`, `3rd`, `th`) dentro de `<sup>...</sup>`?
+- [ ] **Mês**: Os meses estão traduzidos corretamente para o inglês?
+- [ ] **Emissão**: Contém **`... City.`** no local de emissão (ex: `Maputo City.`)?
+- [ ] **Naturalidade**: Está em Title Case (ex: `Maputo`, `Zavala`)?
+- [ ] **Filiação**: Pais em maiúsculas separados por ` and `?
+- [ ] **Gênero**: O pronome na Linha 4 coincide exatamente com o sexo (`he` para masculino, `she` para feminino)?
+- [ ] **Quebra da Linha 4**: Contém a tag `<br />(two thousand and twenty-six)` intacta?
+- [ ] **Notas**: Os valores de `percent` têm espaço antes de `%` e o extenso está correto e capitalizado?
+- [ ] **Cache Version**: A constante `CACHE_VERSION` foi incrementada para forçar o reset no navegador?
+- [ ] **Arquivo do Aluno**: O arquivo `.md` correspondente foi gerado em `students/`?
+- [ ] **Integridade do Código**: Nenhuma função, CSS, SVG ou lógica interna foi tocada?
