@@ -16,7 +16,7 @@ Nome da Mãe / Mother Name: ALICE ANTÓNIO MASSIMBE
 Sexo / Sex: F
 Nível do curso: 5th
 Curso: English
-Data: 2026
+Data: July 2026
 ```
 
 ---
@@ -26,11 +26,11 @@ Data: 2026
 * **Line 1:** `<strong>Efigénio Cardiga José Vuma</strong>, headmaster of Language Community School certifies that <strong style="white-space: nowrap; color: #374151;">ANICETA ISAURA MARTIS</strong>`
 * **Line 2:** `Born on the 15<sup>th</sup> of February 2001 with ID Nr 110106868410P, issued on the 15<sup>th</sup> of March 2023 in Maputo City.`
 * **Line 3:** `Place of birth: Marracuene, Parents: MARTIS GASPAR and ALICE ANTÓNIO MASSIMBE`
-* **Line 4:** `Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in 2026<br />(two thousand and twenty-six)`
+* **Line 4:** `Concluded the 5<sup>th</sup> level of English Course in this institution, she was submitted to the final exams in July 2026<br />(two thousand and twenty-six)`
 * **Line 5:** `Having got the following classification`
 
 ### 📊 Classificações (Grades)
-* **Writing:** `68 %` (`Sixty eight percent`)
-* **Speaking:** `73 %` (`Seventy three percent`)
-* **Listening:** `83 %` (`Eighty three percent`)
-* **Average:** `71 %` (`Seventy one percent`)
+* **Writing:** `75 %` (`Seventy five percent`)
+* **Speaking:** `79 %` (`Seventy nine percent`)
+* **Listening:** `81 %` (`Eighty one percent`)
+* **Average:** `78 %` (`Seventy eight percent`)
